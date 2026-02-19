@@ -113,9 +113,10 @@ export default function Login() {
 
             <div className="login-card">
                 <div className="login-brand">
-                    <img src="/logo.png" alt="Conecta 2026" className="login-logo" />
-                    <h1 className="login-title">CONECTA 2026</h1>
-                    <p className="login-tagline">Transforma tu mente</p>
+                    <img src="/logo1.png" alt="Conecta 2026" className="login-logo" />
+                    <h1 className="login-title">Conecta 2026</h1>
+                    <p className="login-tagline">Sistema de Gestión de Eventos</p>
+                    <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '4px' }}>v2.1 LATEST</p>
                 </div>
 
                 {error && <div className="login-error">{error}</div>}
@@ -147,7 +148,7 @@ export default function Login() {
 
                 <div style={{ marginTop: '20px', textAlign: 'center' }}>
                     <a href="/debug" style={{ color: '#94a3b8', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        <Icons.Settings size={14} /> Diagnóstico de Sistema
+                        <Icons.Settings width={14} height={14} /> Diagnóstico de Sistema
                     </a>
                 </div>
             </div>
