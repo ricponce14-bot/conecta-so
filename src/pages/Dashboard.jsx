@@ -103,7 +103,8 @@ export default function Dashboard() {
         .reduce((s, l) => s + Number(l.valor_total || 0), 0)
 
     const myTotalSales = myExpoSales + mySponsorSales
-    const myCommission = myTotalSales * 0.10 // 10% Commission Rule (Hardcoded per request)
+    // Both are now 10%, so we can just use one constant or average, but simpler to just use base rate
+    const myCommission = myTotalSales * FINANCIAL.COMISION_EXPO
 
     // Chart Data (Admin Only for now, or filtered for Seller?)
     // Simpler to just hide chart for seller or show empty
