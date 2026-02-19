@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { Icons } from '../components/Icons'
 
 function NeuralBackground() {
     const canvasRef = useRef(null)
@@ -145,8 +146,8 @@ export default function Login() {
                 </form>
 
                 <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                    <a href="/debug" style={{ color: '#aaa', fontSize: '11px', textDecoration: 'none', opacity: 0.7 }}>
-                        🛠️ Diagnóstico de Sistema
+                    <a href="/debug" style={{ color: '#94a3b8', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <Icons.Settings size={14} /> Diagnóstico de Sistema
                     </a>
                 </div>
             </div>

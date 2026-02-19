@@ -21,13 +21,12 @@ export default function Debug() {
         const url = import.meta.env.VITE_SUPABASE_URL
         const key = import.meta.env.VITE_SUPABASE_ANON_KEY
         setEnvCheck({
-            url: url ? '✅ Configurado' : '❌ Faltante',
-            key: key ? '✅ Configurado' : '❌ Faltante'
+            url: url ? '[OK] Configurado' : '[ERROR] Faltante',
+            key: key ? '[OK] Configurado' : '[ERROR] Faltante'
         })
         addLog(`Env URL: ${url ? 'OK' : 'MISSING'}`, url ? 'success' : 'error')
 
-        // Proceed even if missing, to test if Fallback works
-        if (!key) addLog('⚠️ Key missing in Env, testing Fallback...', 'warning')
+        if (!key) addLog('[WARN] Key missing in Env, testing Fallback...', 'warning')
 
         // 2. Ping Supabase
         try {
@@ -48,15 +47,15 @@ export default function Debug() {
 
             setSession(session)
             if (session) {
-                addLog(`Sesión activa: ${session.user.email}`, 'success')
+                addLog(`[OK] Sesión activa: ${session.user.email}`, 'success')
 
                 // 4. Test Profile Access
                 await checkProfile(session.user.id)
             } else {
-                addLog('No hay sesión activa (Usuario no logueado)', 'warning')
+                addLog('[WARN] No hay sesión activa (Usuario no logueado)', 'warning')
             }
         } catch (err) {
-            addLog(`Error verificando sesión: ${err.message}`, 'error')
+            addLog(`[FAIL] Error crítico: ${err.message}`, 'error')
         }
     }
 
@@ -71,8 +70,8 @@ export default function Debug() {
 
             if (error) {
                 addLog(`Error leyendo perfil: ${error.message} (Code: ${error.code})`, 'error')
-                if (error.code === '42501') addLog('⚠️ Error de Permisos (RLS) - Probablemente falta la política SELECT', 'error')
-                if (error.code === 'PGRST116') addLog('⚠️ Perfil no encontrado (Row missing)', 'warning')
+                if (error.code === '42501') addLog('[RLS] Error de Permisos - Probablemente falta la política SELECT', 'error')
+                if (error.code === 'PGRST116') addLog('[WARN] Perfil no encontrado (Row missing)', 'warning')
             } else {
                 addLog(`Perfil encontrado: ${data.name} (${data.role})`, 'success')
             }
@@ -99,9 +98,9 @@ export default function Debug() {
 
             if (error) {
                 addLog(`Error creando perfil: ${error.message}`, 'error')
-                if (error.code === '42501') addLog('⚠️ BLOQUEADO POR RLS (Falta política INSERT)', 'error')
+                if (error.code === '42501') addLog('[RLS] BLOQUEADO POR POLÍTICA', 'error')
             } else {
-                addLog('✅ Perfil creado exitosamente!', 'success')
+                addLog('[OK] Perfil creado exitosamente!', 'success')
             }
         } catch (err) {
             addLog(`Excepción creando perfil: ${err.message}`, 'error')
@@ -117,17 +116,17 @@ export default function Debug() {
         try {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass })
             if (error) throw error
-            addLog('✅ Login Exitoso!', 'success')
+            addLog('[OK] Login Exitoso!', 'success')
             setSession(data.session)
             checkProfile(data.session.user.id)
         } catch (err) {
-            addLog(`❌ Login Falló: ${err.message}`, 'error')
+            addLog(`[FAIL] Login Falló: ${err.message}`, 'error')
         }
     }
 
     return (
         <div style={{ padding: '20px', background: '#111', color: '#fff', minHeight: '100vh', fontFamily: 'monospace' }}>
-            <h1>🛠️ Diagnóstico de Conexión</h1>
+            <h1>Diagnóstico de Conexión</h1>
 
             <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #333' }}>
                 <h3>Variables de Entorno</h3>
