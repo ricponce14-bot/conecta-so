@@ -153,9 +153,34 @@ export default function Login() {
                 </form>
 
                 <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                    <a href="/debug" style={{ color: '#94a3b8', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault()
+                            const pwd = prompt('Ingrese clave de acceso al sistema:')
+                            if (pwd === '130303') {
+                                navigate('/debug')
+                            } else if (pwd !== null) {
+                                alert('Clave incorrecta')
+                            }
+                        }}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#94a3b8',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontFamily: 'inherit',
+                            opacity: 0.7,
+                            transition: 'opacity 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.opacity = '1'}
+                        onMouseLeave={(e) => e.target.style.opacity = '0.7'}
+                    >
                         <Icons.Settings width={14} height={14} /> Diagnóstico de Sistema
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
