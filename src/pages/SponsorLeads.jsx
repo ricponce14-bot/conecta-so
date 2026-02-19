@@ -112,19 +112,19 @@ export default function SponsorLeads() {
                                 <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Sin registros</td></tr>
                             ) : filtered.map(lead => (
                                 <tr key={lead.id}>
-                                    <td style={{ fontWeight: 600 }}>{lead.empresa}</td>
-                                    <td>{lead.contacto}</td>
-                                    <td><span className={`badge badge-${lead.nivel.toLowerCase()}`}>{lead.nivel}</span></td>
-                                    <td><span className={`badge badge-${lead.estado.toLowerCase()}`}>{lead.estado}</span></td>
-                                    <td className="money">{formatMoney(lead.valor_total)}</td>
-                                    <td className="money">{formatMoney(lead.monto_pagado)}</td>
-                                    <td>{lead.vendedor?.name || '—'}</td>
-                                    <td>{formatDate(lead.fecha_seguimiento)}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '6px' }}>
-                                            <Link to={`/sponsors/${lead.id}`} className="btn btn-secondary btn-sm">Editar</Link>
+                                    <td data-label="Empresa" style={{ fontWeight: 600 }}>{lead.empresa}</td>
+                                    <td data-label="Contacto">{lead.contacto}</td>
+                                    <td data-label="Nivel"><span className={`badge badge-${lead.nivel.toLowerCase()}`}>{lead.nivel}</span></td>
+                                    <td data-label="Estado"><span className={`badge badge-${lead.estado.toLowerCase()}`}>{lead.estado}</span></td>
+                                    <td data-label="Valor Total" className="money">{formatMoney(lead.valor_total)}</td>
+                                    <td data-label="Pagado" className="money">{formatMoney(lead.monto_pagado)}</td>
+                                    <td data-label="Vendedor">{lead.vendedor?.name || '—'}</td>
+                                    <td data-label="Seguimiento">{formatDate(lead.fecha_seguimiento)}</td>
+                                    <td data-label="Acciones">
+                                        <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                                            <Link to={`/sponsors/${lead.id}`} className="btn btn-secondary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Editar</Link>
                                             {isAdmin && (
-                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm">Eliminar</button>
+                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Eliminar</button>
                                             )}
                                         </div>
                                     </td>

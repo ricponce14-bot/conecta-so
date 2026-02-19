@@ -118,19 +118,19 @@ export default function ExpoLeads() {
                                 <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Sin registros</td></tr>
                             ) : filtered.map(lead => (
                                 <tr key={lead.id}>
-                                    <td style={{ fontWeight: 600 }}>{lead.empresa}</td>
-                                    <td>{lead.contacto_nombre}</td>
-                                    <td>{lead.ciudad || '—'}</td>
-                                    <td><span className={`badge badge-${lead.estado.toLowerCase()}`}>{lead.estado}</span></td>
-                                    <td className="money">{formatMoney(lead.precio_stand)}</td>
-                                    <td className="money">{formatMoney(lead.monto_pagado)}</td>
-                                    <td>{lead.vendedor?.name || '—'}</td>
-                                    <td>{formatDate(lead.fecha_proxima_accion)}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '6px' }}>
-                                            <Link to={`/expo/${lead.id}`} className="btn btn-secondary btn-sm">Editar</Link>
+                                    <td data-label="Empresa" style={{ fontWeight: 600 }}>{lead.empresa}</td>
+                                    <td data-label="Contacto">{lead.contacto_nombre}</td>
+                                    <td data-label="Ciudad">{lead.ciudad || '—'}</td>
+                                    <td data-label="Estado"><span className={`badge badge-${lead.estado.toLowerCase()}`}>{lead.estado}</span></td>
+                                    <td data-label="Precio Stand" className="money">{formatMoney(lead.precio_stand)}</td>
+                                    <td data-label="Pagado" className="money">{lead.monto_pagado}</td>
+                                    <td data-label="Vendedor">{lead.vendedor?.name || '—'}</td>
+                                    <td data-label="Seguimiento">{formatDate(lead.fecha_proxima_accion)}</td>
+                                    <td data-label="Acciones">
+                                        <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                                            <Link to={`/expo/${lead.id}`} className="btn btn-secondary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Editar</Link>
                                             {isAdmin && (
-                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm">Eliminar</button>
+                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Eliminar</button>
                                             )}
                                         </div>
                                     </td>

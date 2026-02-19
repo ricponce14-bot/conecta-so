@@ -831,116 +831,151 @@ tr:hover td {
    MOBILE OPTIMIZATIONS
    ================================================ */
 
+/* ================================================
+   MOBILE OPTIMIZATIONS (PREMIUM UX)
+   ================================================ */
+
 @media (max-width: 768px) {
 
-    /* Layout Adjustments */
+    /* Layout & Navigation */
     .mobile-header {
         display: flex;
-        padding: 0 16px;
+        padding: 0 20px;
+        height: 64px;
+        background: rgba(30, 27, 75, 0.95);
+        backdrop-filter: blur(10px);
     }
 
     .sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
+        width: 85%;
+        /* Broader drawer for better focus */
+        max-width: 320px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
     }
 
     .main-content {
         margin-left: 0;
-        padding: 16px;
-        padding-top: 20px;
+        padding: 20px 16px;
         width: 100%;
-        overflow-x: hidden;
     }
 
-    /* Header & Typography */
-    .page-header {
-        margin-bottom: 24px;
-        text-align: center;
-    }
-
-    .page-header h2 {
-        font-size: 1.5rem;
-    }
-
-    .page-header p {
-        font-size: 0.9rem;
-    }
-
-    /* Grids */
+    /* KPI Grid - Compact 2-Col Layout */
     .kpi-grid {
-        grid-template-columns: 1fr;
-        /* Stack KPIs */
-        gap: 16px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr) !important;
+        /* Force 2 columns */
+        gap: 12px;
     }
 
-    .form-grid {
-        grid-template-columns: 1fr;
-        /* Stack Form Fields */
-        gap: 16px;
-    }
-
-    /* Cards */
-    .card,
     .kpi-card {
-        padding: 20px;
+        padding: 16px;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .kpi-label {
+        font-size: 0.75rem;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .kpi-value {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
+        /* Slightly smaller for mobile */
+        margin-bottom: 4px;
     }
 
-    /* Tables */
-    .table-container {
-        margin: 0 -20px;
-        /* Bleed to edges inside card */
-        width: calc(100% + 40px);
-        padding-bottom: 8px;
-        /* Scrollbar hint */
-        overflow-x: auto;
+    .kpi-card .kpi-sub {
+        font-size: 0.75rem;
     }
 
-    table {
-        min-width: 600px;
-        /* Force scroll */
-    }
-
-    th,
-    td {
-        padding: 12px;
-        font-size: 0.85rem;
-    }
-
-    /* Buttons & Actions */
-    .toolbar-filters {
-        flex-direction: column;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
-        gap: 12px;
-    }
-
-    .btn {
-        width: 100%;
-    }
-
-    /* Toolbar stack */
-    .toolbar {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
-    }
-
-    .toolbar>div {
-        width: 100%;
+    /* Forms - Optimized Touch Targets */
+    .form-grid {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        font-size: 16px;
+        /* Prevents iOS zooom */
+        padding: 12px 16px;
+        /* Larger touch target */
+    }
+
+    /* TRANSFORM TABLES TO CARDS (The "Pro" Move) */
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+        display: block;
+    }
+
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    td {
+        border: none;
+        position: relative;
+        padding-left: 0;
+        padding-right: 0;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        font-size: 0.95rem;
+        border-bottom: 1px dashed #f1f5f9;
+        min-height: 40px;
+    }
+
+    td:last-child {
+        border-bottom: none;
+        justify-content: flex-end;
+        padding-top: 16px;
+        margin-top: 8px;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    /* Add labels via CSS Attribute if possible, or just style heavily */
+    /* Since we can't easily inject data-label via React instantly everywhere, 
+       we'll rely on the row structure. 
+       Ideally we'd add data-label prop to tds. */
+
+    /* Actions Row Special Styling */
+    tr td:last-child button {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* Hide table container overflow since we are now block level */
+    .table-container {
+        overflow: visible;
     }
 }
 

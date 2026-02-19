@@ -182,17 +182,17 @@ export default function Tickets() {
                                 const iv = t.vip_vendidos * FINANCIAL.PRECIO_VIP
                                 return (
                                     <tr key={t.id}>
-                                        <td>{formatDate(t.fecha)}</td>
-                                        <td>{t.generales_vendidos}</td>
-                                        <td>{t.vip_vendidos}</td>
-                                        <td className="money">{formatMoney(ig)}</td>
-                                        <td className="money">{formatMoney(iv)}</td>
-                                        <td className="money">{formatMoney(t.consumo_estimado)}</td>
-                                        <td className="money" style={{ fontWeight: 700 }}>{formatMoney(ig + iv + Number(t.consumo_estimado))}</td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: '6px' }}>
-                                                <button onClick={() => startEdit(t)} className="btn btn-secondary btn-sm">Editar</button>
-                                                <button onClick={() => handleDelete(t.id)} className="btn btn-danger btn-sm">Eliminar</button>
+                                        <td data-label="Fecha" style={{ fontWeight: 600 }}>{formatDate(t.fecha)}</td>
+                                        <td data-label="Generales">{t.generales_vendidos}</td>
+                                        <td data-label="VIP">{t.vip_vendidos}</td>
+                                        <td data-label="Ingreso Gral." className="money">{formatMoney(ig)}</td>
+                                        <td data-label="Ingreso VIP" className="money">{formatMoney(iv)}</td>
+                                        <td data-label="Consumo" className="money">{formatMoney(t.consumo_estimado)}</td>
+                                        <td data-label="TOTAL" className="money" style={{ fontWeight: 700, color: 'var(--primary)' }}>{formatMoney(ig + iv + Number(t.consumo_estimado))}</td>
+                                        <td data-label="Acciones">
+                                            <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                                                <button onClick={() => startEdit(t)} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>Editar</button>
+                                                <button onClick={() => handleDelete(t.id)} className="btn btn-danger btn-sm" style={{ flex: 1 }}>Eliminar</button>
                                             </div>
                                         </td>
                                     </tr>
