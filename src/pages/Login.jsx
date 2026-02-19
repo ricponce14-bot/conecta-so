@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Icons } from '../components/Icons'
+import logo from '../assets/logo1.png'
 
 function NeuralBackground() {
     const canvasRef = useRef(null)
