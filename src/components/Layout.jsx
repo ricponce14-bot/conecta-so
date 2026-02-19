@@ -25,82 +25,78 @@ export default function Layout() {
 
     return (
         <div className="app-layout">
-            {/* Mobile Header */}
+            {/* Mobile Header (Compact) */}
             <header className="mobile-header">
                 <img src={logo} alt="Conecta" className="mobile-logo" />
-                <button className="menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                    {isSidebarOpen ? <Icons.X /> : <Icons.Menu />}
-                </button>
+                <div className="user-profile-small">
+                    <div className="avatar small">{initials}</div>
+                </div>
             </header>
 
-            {/* Mobile Overlay */}
-            <div
-                className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
-                onClick={closeSidebar}
-            />
+            {/* Mobile Top Navigation (Scrollable) */}
+            <nav className="mobile-top-nav">
+                <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    <Icons.LayoutDashboard size={20} />
+                    <span>Dash</span>
+                </NavLink>
+                <NavLink to="/expo" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    <Icons.Briefcase size={20} />
+                    <span>Expo</span>
+                </NavLink>
+                <NavLink to="/sponsors" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    <Icons.Handshake size={20} />
+                    <span>Sponsors</span>
+                </NavLink>
+                {isAdmin && (
+                    <>
+                        <NavLink to="/tickets" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                            <Icons.Ticket size={20} />
+                            <span>Boletos</span>
+                        </NavLink>
+                        <NavLink to="/costs" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                            <Icons.DollarSign size={20} />
+                            <span>Costos</span>
+                        </NavLink>
+                    </>
+                )}
+                <NavLink to="/kpis" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    <Icons.BarChart size={20} />
+                    <span>KPIs</span>
+                </NavLink>
+            </nav>
 
-            {/* Sidebar */}
-            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+            {/* Desktop Sidebar (Hidden on Mobile) */}
+            <aside className="sidebar">
                 <div className="sidebar-header">
                     <img src={logo} alt="Conecta 2026" className="brand-logo" />
                 </div>
 
                 <nav className="sidebar-nav">
-                    <NavLink
-                        to="/"
-                        end
-                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                        onClick={closeSidebar}
-                    >
+                    <NavLink to="/" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                         <Icons.LayoutDashboard className="nav-icon" />
                         <span>Dashboard</span>
                     </NavLink>
-
-                    <NavLink
-                        to="/expo"
-                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                        onClick={closeSidebar}
-                    >
+                    <NavLink to="/expo" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                         <Icons.Briefcase className="nav-icon" />
                         <span>Expo</span>
                     </NavLink>
-
-                    <NavLink
-                        to="/sponsors"
-                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                        onClick={closeSidebar}
-                    >
+                    <NavLink to="/sponsors" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                         <Icons.Handshake className="nav-icon" />
                         <span>Patrocinios</span>
                     </NavLink>
-
                     {isAdmin && (
                         <>
-                            <NavLink
-                                to="/tickets"
-                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                                onClick={closeSidebar}
-                            >
+                            <NavLink to="/tickets" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                                 <Icons.Ticket className="nav-icon" />
                                 <span>Boletos</span>
                             </NavLink>
-
-                            <NavLink
-                                to="/costs"
-                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                                onClick={closeSidebar}
-                            >
+                            <NavLink to="/costs" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                                 <Icons.DollarSign className="nav-icon" />
                                 <span>Costos</span>
                             </NavLink>
                         </>
                     )}
-
-                    <NavLink
-                        to="/kpis"
-                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                        onClick={closeSidebar}
-                    >
+                    <NavLink to="/kpis" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                         <Icons.BarChart className="nav-icon" />
                         <span>KPIs</span>
                     </NavLink>

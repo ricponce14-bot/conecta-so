@@ -837,6 +837,109 @@ tr:hover td {
 
 @media (max-width: 768px) {
 
+    /* RESET: Hide Sidebar Completely */
+    .sidebar {
+        display: none !important;
+    }
+
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    /* Layout Adjustments */
+    .mobile-header {
+        display: flex;
+        padding: 0 16px;
+        height: 56px;
+        /* Compact */
+        background: #1e1b4b;
+        /* Solid Dark */
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 50;
+    }
+
+    .mobile-logo {
+        height: 32px;
+    }
+
+    /* Avatar in Header */
+    .avatar.small {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+        background: var(--primary);
+    }
+
+    /* TOP NAVIGATION BAR */
+    .mobile-top-nav {
+        display: flex;
+        position: fixed;
+        top: 56px;
+        /* Below Header */
+        left: 0;
+        width: 100%;
+        background: #ffffff;
+        z-index: 49;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 8px 16px;
+        gap: 8px;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        -webkit-overflow-scrolling: touch;
+        /* Momentum Scroll */
+        scrollbar-width: none;
+        /* Hide scrollbar Firefox */
+    }
+
+    .mobile-top-nav::-webkit-scrollbar {
+        display: none;
+        /* Hide scrollbar Chrome/Safari */
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        /* Prevent compression */
+    }
+
+    .mobile-nav-item.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 2px 5px rgba(79, 70, 229, 0.4);
+    }
+
+    .mobile-nav-item span {
+        display: inline-block;
+    }
+
+    /* Adjust Main Content for Double Header */
+    .main-content {
+        margin-left: 0;
+        padding: 120px 16px 20px 16px;
+        /* 56+56+padding */
+        width: 100%;
+    }
+
+    /* Hide Desktop-only stuff */
+    .mobile-header .menu-toggle {
+        display: none;
+    }
+
     /* Layout & Navigation */
     .mobile-header {
         display: flex;
