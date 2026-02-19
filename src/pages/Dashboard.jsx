@@ -110,26 +110,52 @@ export default function Dashboard() {
 
     return (
         <div>
-            {/* Welcome Banner */}
-            <div className="welcome-banner card" style={{
+            {/* Countdown Banner */}
+            <div className="countdown-banner card" style={{
                 marginBottom: '32px',
-                background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
                 color: 'white',
-                padding: '40px',
+                padding: '32px',
                 position: 'relative',
                 overflow: 'hidden',
-                border: 'none',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
             }}>
-                <div style={{ position: 'relative', zIndex: 10 }}>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>Conecta 2026 Admin</h2>
-                    <p style={{ fontSize: '1.25rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Icons.Calendar width={20} height={20} />
-                        {daysRemaining} días restantes — Meta: 18 de abril
-                    </p>
+                <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
+                        <div>
+                            <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em', color: 'white' }}>Conecta 2026 Admin</h2>
+                            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>Meta: 18 de abril de 2026</p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <span style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{daysRemaining}</span>
+                            <span style={{ fontSize: '1rem', opacity: 0.8, marginLeft: '6px' }}>días restantes</span>
+                        </div>
+                    </div>
+
+                    {/* Progress Bar Container */}
+                    <div style={{
+                        height: '16px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        borderRadius: '99px',
+                        overflow: 'hidden',
+                        position: 'relative'
+                    }}>
+                        {/* Progress Fill */}
+                        <div style={{
+                            width: `${Math.max(5, Math.min(100, ((365 - daysRemaining) / 365) * 100))}%`, // Mock calc based on year
+                            height: '100%',
+                            background: 'linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%)',
+                            borderRadius: '99px',
+                            transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: '0 0 15px rgba(6, 182, 212, 0.5)'
+                        }} />
+                    </div>
                 </div>
-                <div style={{ position: 'absolute', right: '-20px', bottom: '-40px', opacity: 0.2, transform: 'rotate(-10deg) scale(2)' }}>
-                    <Icons.TrendingUp width={200} height={200} />
+
+                {/* Decoration */}
+                <div style={{ position: 'absolute', right: '-10px', bottom: '-40px', opacity: 0.1, transform: 'rotate(-5deg) scale(1.5)' }}>
+                    <Icons.Calendar width={180} height={180} />
                 </div>
             </div>
 
