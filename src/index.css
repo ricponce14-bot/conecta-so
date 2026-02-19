@@ -636,12 +636,14 @@ tr:hover td {
     color: #ffffff;
     margin-bottom: 4px;
     letter-spacing: -0.5px;
+    text-align: center;
 }
 
 .login-tagline {
     color: #94a3b8;
     font-size: 0.95rem;
     margin-bottom: 30px;
+    text-align: center;
 }
 
 .login-field label {
