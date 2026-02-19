@@ -81,7 +81,7 @@ export default function Debug() {
         }
     }
 
-    async function manualProfileCreate() {
+    const manualProfileCreate = async () => {
         if (!session) return alert('No hay sesión activa')
 
         try {
@@ -108,6 +108,23 @@ export default function Debug() {
         }
     }
 
+    const debugLogin = async (e) => {
+        e.preventDefault()
+        const email = e.target.email.value
+        const pass = e.target.password.value
+        addLog(`Intentando Login: ${email}...`, 'info')
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass })
+            if (error) throw error
+            addLog('✅ Login Exitoso!', 'success')
+            setSession(data.session)
+            checkProfile(data.session.user.id)
+        } catch (err) {
+            addLog(`❌ Login Falló: ${err.message}`, 'error')
+        }
+    }
+
     return (
         <div style={{ padding: '20px', background: '#111', color: '#fff', minHeight: '100vh', fontFamily: 'monospace' }}>
             <h1>🛠️ Diagnóstico de Conexión</h1>
@@ -115,6 +132,22 @@ export default function Debug() {
             <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #333' }}>
                 <h3>Variables de Entorno</h3>
                 <pre>{JSON.stringify(envCheck, null, 2)}</pre>
+            </div>
+
+            <div style={{ marginBottom: '20px', background: '#222', padding: '15px' }}>
+                <h3>Prueba de Login Directo</h3>
+                <form onSubmit={debugLogin} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input name="email" placeholder="Email" defaultValue="admin@conecta.com" style={{ padding: '5px' }} />
+                    <input name="password" type="password" placeholder="Password" style={{ padding: '5px' }} />
+                    <button type="submit" style={{ padding: '5px 15px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
+                        Iniciar Sesión Test
+                    </button>
+                    {session && <button type="button" onClick={async () => {
+                        await supabase.auth.signOut()
+                        setSession(null)
+                        addLog('Sesión cerrada', 'info')
+                    }} style={{ padding: '5px 15px', background: '#666', color: 'white', border: 'none' }}>Cerrar Sesión</button>}
+                </form>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
