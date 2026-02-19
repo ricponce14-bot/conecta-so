@@ -25,7 +25,7 @@ export default function ExpoLeadForm() {
 
     async function loadData() {
         setLoading(true)
-        const vendRes = await supabase.from('profiles').select('id, name')
+        const vendRes = await supabase.from('profiles').select('id, name').eq('role', 'VENDEDOR')
         setVendedores(vendRes.data || [])
 
         if (!isNew) {
@@ -113,13 +113,13 @@ export default function ExpoLeadForm() {
                         </div>
                         <div className="form-group">
                             <label>Estado</label>
-                            <select name="estado" value={form.estado} onChange={handleChange}>
+                            <select name="estado" value={form.estado} onChange={handleChange} className="modern-select">
                                 {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
                             </select>
                         </div>
                         <div className="form-group">
                             <label>Vendedor</label>
-                            <select name="vendedor_id" value={form.vendedor_id} onChange={handleChange} disabled={!isAdmin}>
+                            <select name="vendedor_id" value={form.vendedor_id} onChange={handleChange} disabled={!isAdmin} className="modern-select">
                                 <option value="">Sin asignar</option>
                                 {vendedores.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                             </select>
