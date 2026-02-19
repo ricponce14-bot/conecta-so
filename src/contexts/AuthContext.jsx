@@ -16,11 +16,16 @@ export function AuthProvider({ children }) {
             if (mounted) setLoading(false)
         }, 3000)
 
+        // Initial session check
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!mounted) return
             setUser(session?.user ?? null)
             if (session?.user) {
-                fetchProfile(session.user.id).catch(() => setLoading(false))
+                // Pass email for self-healing profile creation
+                fetchProfile(session.user.id, session.user.email).catch(err => {
+                    console.error('Initial profile fetch failed', err)
+                    if (mounted) setLoading(false)
+                })
             } else {
                 setLoading(false)
             }
@@ -31,11 +36,12 @@ export function AuthProvider({ children }) {
             clearTimeout(timeout)
         })
 
+        // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             if (!mounted) return
             setUser(session?.user ?? null)
             if (session?.user) {
-                fetchProfile(session.user.id).catch(() => setLoading(false))
+                fetchProfile(session.user.id, session.user.email).catch(() => setLoading(false))
             } else {
                 setProfile(null)
                 setLoading(false)
@@ -49,14 +55,46 @@ export function AuthProvider({ children }) {
         }
     }, [])
 
-    async function fetchProfile(userId) {
-        const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single()
-        setProfile(data)
-        setLoading(false)
+    async function fetchProfile(userId, email) {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single()
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Error fetching profile:', error)
+                return
+            }
+
+            if (data) {
+                setProfile(data)
+            } else {
+                // Profile missing? Create it now (Self-healing)
+                console.warn('Profile missing for user, creating default...')
+                const { data: newProfile, error: createError } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        id: userId,
+                        name: email?.split('@')[0] || 'Usuario',
+                        email: email,
+                        role: 'VENDEDOR' // Default role
+                    }])
+                    .select()
+                    .single()
+
+                if (createError) {
+                    console.error('Failed to create missing profile:', createError)
+                } else {
+                    setProfile(newProfile)
+                }
+            }
+        } catch (err) {
+            console.error('Profile fetch exception:', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     async function signIn(email, password) {
