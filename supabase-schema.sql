@@ -123,6 +123,9 @@ CREATE POLICY "Users can view all profiles"
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE TO authenticated USING (id = auth.uid());
 
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT TO authenticated WITH CHECK (id = auth.uid());
+
 -- EXPO_LEADS policies
 CREATE POLICY "Admins can do everything with expo_leads"
   ON expo_leads FOR ALL TO authenticated USING (is_admin());

@@ -143,6 +143,12 @@ export default function Login() {
                         {loading ? 'Ingresando...' : 'Iniciar sesion'}
                     </button>
                 </form>
+
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <a href="/debug" style={{ color: '#aaa', fontSize: '11px', textDecoration: 'none', opacity: 0.7 }}>
+                        🛠️ Diagnóstico de Sistema
+                    </a>
+                </div>
             </div>
         </div>
     )

@@ -12,6 +12,7 @@ import SponsorLeadForm from './pages/SponsorLeadForm'
 import Tickets from './pages/Tickets'
 import Costs from './pages/Costs'
 import SalesKPIs from './pages/SalesKPIs'
+import Debug from './pages/Debug'
 import './index.css'
 
 function AppRoutes() {
@@ -31,6 +32,8 @@ function AppRoutes() {
                 {showLongLoading && (
                     <div style={{ fontSize: '0.8rem', color: '#ffc107', maxWidth: '300px', textAlign: 'center' }}>
                         Tarda más de lo esperado. Verifica tu conexión o recarga la página.
+                        <br /><br />
+                        <a href="/debug" style={{ color: '#ffc107', textDecoration: 'underline' }}>Ir a Diagnóstico</a>
                     </div>
                 )}
             </div>
@@ -39,6 +42,7 @@ function AppRoutes() {
 
     return (
         <Routes>
+            <Route path="/debug" element={<Debug />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                 <Route path="/" element={<Dashboard />} />
