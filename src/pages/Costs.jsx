@@ -22,9 +22,16 @@ export default function Costs() {
     }
 
     async function saveEdit(id) {
-        await supabase.from('costs').update({ pagado: Number(editPagado) }).eq('id', id)
-        setEditId(null)
-        fetchCosts()
+        if (Number(editPagado) < 0) return alert('El monto no puede ser negativo')
+
+        const { error } = await supabase.from('costs').update({ pagado: Number(editPagado) }).eq('id', id)
+
+        if (error) {
+            alert('Error actualizando: ' + error.message)
+        } else {
+            setEditId(null)
+            fetchCosts()
+        }
     }
 
     const totalCostos = costs.reduce((s, c) => s + Number(c.total), 0)
@@ -94,6 +101,7 @@ export default function Costs() {
                                             {editId === c.id ? (
                                                 <input
                                                     type="number"
+                                                    min="0"
                                                     step="0.01"
                                                     value={editPagado}
                                                     onChange={e => setEditPagado(e.target.value)}

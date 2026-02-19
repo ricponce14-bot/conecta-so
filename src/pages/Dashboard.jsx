@@ -9,19 +9,35 @@ export default function Dashboard() {
     useEffect(() => { fetchAll() }, [])
 
     async function fetchAll() {
-        const [expoRes, sponsorRes, ticketRes, costRes] = await Promise.all([
-            supabase.from('expo_leads').select('*'),
-            supabase.from('sponsor_leads').select('*'),
-            supabase.from('tickets').select('*'),
-            supabase.from('costs').select('*'),
-        ])
-        setData({
-            expo: expoRes.data || [],
-            sponsors: sponsorRes.data || [],
-            tickets: ticketRes.data || [],
-            costs: costRes.data || [],
-        })
-        setLoading(false)
+        try {
+            const results = await Promise.allSettled([
+                supabase.from('expo_leads').select('*'),
+                supabase.from('sponsor_leads').select('*'),
+                supabase.from('tickets').select('*'),
+                supabase.from('costs').select('*'),
+            ])
+
+            const [expoRes, sponsorRes, ticketRes, costRes] = results
+
+            const getData = (res, name) => {
+                if (res.status === 'fulfilled' && !res.value.error) {
+                    return res.value.data || []
+                }
+                console.warn(`Failed to fetch ${name}`, res.reason || res.value?.error)
+                return []
+            }
+
+            setData({
+                expo: getData(expoRes, 'expo'),
+                sponsors: getData(sponsorRes, 'sponsors'),
+                tickets: getData(ticketRes, 'tickets'),
+                costs: getData(costRes, 'costs'),
+            })
+        } catch (err) {
+            console.error('Critical dashboard error:', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     if (loading || !data) return <div className="loading-spinner">Cargando datos...</div>

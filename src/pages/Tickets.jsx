@@ -55,8 +55,17 @@ export default function Tickets() {
 
     async function handleDelete(id) {
         if (!confirm('Confirmar eliminacion del registro.')) return
-        await supabase.from('tickets').delete().eq('id', id)
-        fetchTickets()
+
+        const prev = [...tickets]
+        setTickets(tickets.filter(t => t.id !== id))
+
+        const { error } = await supabase.from('tickets').delete().eq('id', id)
+        if (error) {
+            alert('Error eliminando: ' + error.message)
+            setTickets(prev)
+        } else {
+            fetchTickets() // Refresh to ensure totals are exact
+        }
     }
 
     const totalGen = tickets.reduce((s, t) => s + Number(t.generales_vendidos), 0)

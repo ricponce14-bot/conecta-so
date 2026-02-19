@@ -31,8 +31,15 @@ export default function SponsorLeads() {
 
     async function handleDelete(id) {
         if (!confirm('Confirmar eliminacion del registro.')) return
-        await supabase.from('sponsor_leads').delete().eq('id', id)
+
+        const prev = [...leads]
         setLeads(leads.filter(l => l.id !== id))
+
+        const { error } = await supabase.from('sponsor_leads').delete().eq('id', id)
+        if (error) {
+            alert('Error eliminando: ' + error.message)
+            setLeads(prev)
+        }
     }
 
     const filtered = leads.filter(l => {
