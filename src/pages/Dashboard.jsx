@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatMoney, formatNumber, getDaysRemaining, getSmartAlerts, FINANCIAL } from '../lib/utils'
+import { Icons } from '../components/Icons'
 
 export default function Dashboard() {
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => { fetchAll() }, [])
 
     async function fetchAll() {
         try {
+            // Verify Supabase Connection
+            if (!supabase.supabaseUrl) throw new Error("Supabase URL missing")
+
             const results = await Promise.allSettled([
                 supabase.from('expo_leads').select('*'),
                 supabase.from('sponsor_leads').select('*'),
@@ -23,7 +28,9 @@ export default function Dashboard() {
                 if (res.status === 'fulfilled' && !res.value.error) {
                     return res.value.data || []
                 }
-                console.warn(`Failed to fetch ${name}`, res.reason || res.value?.error)
+                const msg = `Error fetching ${name}: ${res.reason || res.value?.error?.message}`
+                console.warn(msg)
+                if (!error) setError(msg) // Capture first error
                 return []
             }
 
@@ -35,12 +42,24 @@ export default function Dashboard() {
             })
         } catch (err) {
             console.error('Critical dashboard error:', err)
+            setError(err.message)
         } finally {
             setLoading(false)
         }
     }
 
-    if (loading || !data) return <div className="loading-spinner">Cargando datos...</div>
+    if (loading) return <div className="loading-spinner">Cargando datos...</div>
+    if (error) return (
+        <div className="alert alert-warning" style={{ margin: '20px' }}>
+            <Icons.AlertTriangle width={24} height={24} />
+            <div>
+                <strong>Error de Conexión:</strong> {error}
+                <br />
+                <small>Revise las variables de entorno en Vercel (VITE_SUPABASE_URL).</small>
+            </div>
+        </div>
+    )
+    if (!data) return null
 
     // Calculations
     const expoCerrados = data.expo.filter(l => l.estado === 'CERRADO')
@@ -91,115 +110,139 @@ export default function Dashboard() {
 
     return (
         <div>
-            <div className="page-header">
-                <h2>Panel de Control</h2>
-                <p>{daysRemaining} dias restantes para el evento — Fecha objetivo: 18 de abril de 2026</p>
+            {/* Welcome Banner */}
+            <div className="welcome-banner card" style={{
+                marginBottom: '32px',
+                background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+                color: 'white',
+                padding: '40px',
+                position: 'relative',
+                overflow: 'hidden',
+                border: 'none',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+            }}>
+                <div style={{ position: 'relative', zIndex: 10 }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>Conecta 2026 Admin</h2>
+                    <p style={{ fontSize: '1.25rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Icons.Calendar width={20} height={20} />
+                        {daysRemaining} días restantes — Meta: 18 de abril
+                    </p>
+                </div>
+                <div style={{ position: 'absolute', right: '-20px', bottom: '-40px', opacity: 0.2, transform: 'rotate(-10deg) scale(2)' }}>
+                    <Icons.TrendingUp width={200} height={200} />
+                </div>
             </div>
 
             {/* Smart Alerts */}
             {alerts.map((a, i) => (
-                <div key={i} className={`alert alert-${a.type}`}>{a.message}</div>
+                <div key={i} className={`alert alert-${a.type}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Icons.AlertTriangle width={18} height={18} />
+                    {a.message}
+                </div>
             ))}
 
             {/* Revenue Progress */}
-            <div className="progress-section">
+            <div className="progress-section card" style={{ padding: '24px 32px' }}>
                 <div className="progress-header">
-                    <span className="label">Ingreso confirmado vs. meta ({formatMoney(FINANCIAL.META_INGRESOS)})</span>
-                    <span className="value">{(progress * 100).toFixed(1)}%</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ padding: '8px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success)' }}>
+                            <Icons.TrendingUp width={20} height={20} />
+                        </div>
+                        <div>
+                            <span className="label" style={{ display: 'block', marginBottom: '2px' }}>Meta de Ingresos</span>
+                            <span className="value money" style={{ fontSize: '1.25rem' }}>{formatMoney(ingresoConfirmado)} / {formatMoney(FINANCIAL.META_INGRESOS)}</span>
+                        </div>
+                    </div>
+                    <span className="value" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}>
+                        {(progress * 100).toFixed(1)}%
+                    </span>
                 </div>
-                <div className="progress-bar">
-                    <div className={`progress-fill ${progressColor}`} style={{ width: `${Math.min(100, progress * 100)}%` }} />
+                <div className="progress-bar" style={{ height: '12px', marginTop: '16px' }}>
+                    <div className={`progress-fill ${progressColor}`} style={{ width: `${Math.min(100, progress * 100)}%`, transition: 'width 1s ease' }} />
                 </div>
             </div>
 
             {/* KPI Grid */}
             <div className="kpi-grid">
                 <div className="kpi-card blue">
-                    <div className="kpi-label">Stands cerrados</div>
-                    <div className="kpi-value">{expoCerrados.length}</div>
-                    <div className="kpi-sub">{data.expo.length} prospectos totales</div>
+                    <div className="kpi-label">Prospectos Expo</div>
+                    <div className="kpi-value">{data.expo.length}</div>
+                    <div className="kpi-sub">{expoCerrados.length} cerrados</div>
+                    <div className="kpi-icon-bg"><Icons.Briefcase /></div>
                 </div>
-                <div className="kpi-card blue">
-                    <div className="kpi-label">Sponsors cerrados</div>
-                    <div className="kpi-value">{sponsorCerrados.length}</div>
-                    <div className="kpi-sub">{data.sponsors.length} prospectos totales</div>
-                </div>
-                <div className="kpi-card green">
-                    <div className="kpi-label">Generales vendidos</div>
-                    <div className="kpi-value">{formatNumber(totalGen)}</div>
+                <div className="kpi-card purple">
+                    <div className="kpi-label">Prospectos Sponsors</div>
+                    <div className="kpi-value">{data.sponsors.length}</div>
+                    <div className="kpi-sub">{sponsorCerrados.length} cerrados</div>
+                    <div className="kpi-icon-bg"><Icons.Handshake /></div>
                 </div>
                 <div className="kpi-card green">
-                    <div className="kpi-label">VIP vendidos</div>
-                    <div className="kpi-value">{formatNumber(totalVip)}</div>
-                </div>
-                <div className="kpi-card green">
-                    <div className="kpi-label">Ingreso confirmado</div>
-                    <div className="kpi-value money">{formatMoney(ingresoConfirmado)}</div>
+                    <div className="kpi-label">Boletos Vendidos</div>
+                    <div className="kpi-value">{formatNumber(totalGen + totalVip)}</div>
+                    <div className="kpi-sub">{formatMoney(ingresoTickets)}</div>
+                    <div className="kpi-icon-bg"><Icons.Ticket /></div>
                 </div>
                 <div className={`kpi-card ${utilidadProyectada >= 0 ? 'green' : 'red'}`}>
-                    <div className="kpi-label">Utilidad proyectada</div>
+                    <div className="kpi-label">Utilidad Proyectada</div>
                     <div className="kpi-value money">{formatMoney(utilidadProyectada)}</div>
-                </div>
-                <div className={`kpi-card ${cajaReal >= 0 ? 'green' : 'red'}`}>
-                    <div className="kpi-label">Caja real disponible</div>
-                    <div className="kpi-value money">{formatMoney(cajaReal)}</div>
-                </div>
-                <div className={`kpi-card ${utilidadProyectada >= 0 ? 'green' : 'red'}`}>
-                    <div className="kpi-label">Punto de equilibrio</div>
-                    <div className="kpi-value">{utilidadProyectada >= 0 ? 'CUBIERTO' : 'DEFICIT'}</div>
+                    <div className="kpi-sub">vs. Costos: {formatMoney(totalCosts)}</div>
+                    <div className="kpi-icon-bg"><Icons.DollarSign /></div>
                 </div>
             </div>
 
             {/* Revenue Breakdown */}
-            <div className="card" style={{ marginBottom: '24px' }}>
-                <div style={{ marginBottom: '16px' }}>
-                    <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--text-heading)' }}>Desglose de ingresos</h3>
-                </div>
-                <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Fuente</th>
-                                <th style={{ textAlign: 'right' }}>Monto</th>
-                                <th style={{ textAlign: 'right' }}>Porcentaje</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {breakdown.map(b => (
-                                <tr key={b.label}>
-                                    <td style={{ fontWeight: 500 }}>{b.label}</td>
-                                    <td className="money" style={{ textAlign: 'right' }}>{formatMoney(b.value)}</td>
-                                    <td style={{ textAlign: 'right', color: 'var(--text-secondary)' }}>
-                                        {ingresoConfirmado > 0 ? ((b.value / ingresoConfirmado) * 100).toFixed(1) : 0}%
-                                    </td>
+            <div className="grid-2-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+                <div className="card">
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Icons.BarChart width={20} height={20} /> Desglose de Ingresos
+                    </h3>
+                    <div className="table-container">
+                        <table>
+                            <tbody>
+                                {breakdown.map(b => (
+                                    <tr key={b.label}>
+                                        <td style={{ fontWeight: 500 }}>{b.label}</td>
+                                        <td className="money" style={{ textAlign: 'right' }}>{formatMoney(b.value)}</td>
+                                        <td style={{ textAlign: 'right', width: '60px' }}>
+                                            <div style={{ background: 'var(--bg-body)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                                                {ingresoConfirmado > 0 ? ((b.value / ingresoConfirmado) * 100).toFixed(0) : 0}%
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                <tr style={{ fontWeight: 700, borderTop: '2px solid var(--border)' }}>
+                                    <td>Total</td>
+                                    <td className="money" style={{ textAlign: 'right' }}>{formatMoney(ingresoConfirmado)}</td>
+                                    <td></td>
                                 </tr>
-                            ))}
-                            <tr style={{ fontWeight: 700, borderTop: '2px solid var(--border)' }}>
-                                <td>Total</td>
-                                <td className="money" style={{ textAlign: 'right' }}>{formatMoney(ingresoConfirmado)}</td>
-                                <td style={{ textAlign: 'right' }}>100%</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Revenue Accumulation Chart */}
+                <div className="card chart-container">
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Icons.TrendingUp width={20} height={20} /> Tendencia de Ventas
+                    </h3>
+                    {chartDates.length > 0 ? (
+                        <>
+                            <div className="chart-bars">
+                                {chartValues.map((v, i) => (
+                                    <div key={i} className="chart-bar" style={{ height: `${(v / chartMax) * 100}%` }} title={`${chartDates[i]}: ${formatMoney(v)}`} />
+                                ))}
+                            </div>
+                            <div className="chart-labels">
+                                {chartDates.map((d, i) => (
+                                    <span key={i}>{d.substring(5)}</span>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Sin datos suficientes</div>
+                    )}
                 </div>
             </div>
-
-            {/* Revenue Accumulation Chart */}
-            {chartDates.length > 0 && (
-                <div className="card chart-container">
-                    <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '16px' }}>Acumulacion de ingresos por fecha</h3>
-                    <div className="chart-bars">
-                        {chartValues.map((v, i) => (
-                            <div key={i} className="chart-bar" style={{ height: `${(v / chartMax) * 100}%` }} title={`${chartDates[i]}: ${formatMoney(v)}`} />
-                        ))}
-                    </div>
-                    <div className="chart-labels">
-                        {chartDates.map((d, i) => (
-                            <span key={i}>{d.substring(5)}</span>
-                        ))}
-                    </div>
-                </div>
-            )}
         </div>
     )
 }
