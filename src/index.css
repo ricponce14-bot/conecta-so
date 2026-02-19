@@ -86,7 +86,8 @@ body {
 }
 
 .sidebar-header {
-    height: 90px;
+    height: 100px;
+    /* Slight increase */
     display: flex;
     align-items: center;
     padding: 0 28px;
@@ -96,9 +97,33 @@ body {
 }
 
 .brand-logo {
-    height: 42px;
+    height: 55px;
+    /* Bigger Sidebar Logo */
     width: auto;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* ... existing code ... */
+
+/* Mobile */
+.mobile-header {
+    display: none;
+    background: var(--bg-sidebar);
+    height: var(--header-height);
+    padding: 0 20px;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.mobile-logo {
+    height: 48px;
+    /* Bigger Mobile Header Logo */
+    width: auto;
 }
 
 .sidebar-nav {
