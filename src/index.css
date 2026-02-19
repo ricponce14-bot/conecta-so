@@ -106,8 +106,13 @@ body {
 /* ... existing code ... */
 
 /* Mobile */
-.mobile-header {
+.mobile-header,
+.mobile-top-nav {
     display: none;
+    /* Hidden on Desktop */
+}
+
+.mobile-header {
     background: var(--bg-sidebar);
     height: var(--header-height);
     padding: 0 20px;
@@ -1180,3 +1185,5 @@ tr:hover td {
     cursor: pointer;
     accent-color: var(--primary);
 }
+
+/* Force Refresh: 2026-02-19T05:30:00 */
