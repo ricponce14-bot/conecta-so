@@ -79,11 +79,11 @@ export default function SponsorLeads() {
 
             <div className="toolbar">
                 <div className="toolbar-filters">
-                    <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}>
+                    <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="modern-select">
                         <option value="">Todos los estados</option>
                         {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
                     </select>
-                    <select value={filtroNivel} onChange={e => setFiltroNivel(e.target.value)}>
+                    <select value={filtroNivel} onChange={e => setFiltroNivel(e.target.value)} className="modern-select">
                         <option value="">Todos los niveles</option>
                         {NIVELES.map(n => <option key={n} value={n}>{n}</option>)}
                     </select>

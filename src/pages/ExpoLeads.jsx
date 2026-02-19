@@ -83,12 +83,12 @@ export default function ExpoLeads() {
 
             <div className="toolbar">
                 <div className="toolbar-filters">
-                    <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}>
+                    <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="modern-select">
                         <option value="">Todos los estados</option>
                         {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
                     </select>
                     {isAdmin && (
-                        <select value={filtroVendedor} onChange={e => setFiltroVendedor(e.target.value)}>
+                        <select value={filtroVendedor} onChange={e => setFiltroVendedor(e.target.value)} className="modern-select">
                             <option value="">Todos los vendedores</option>
                             {vendedores.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                         </select>
