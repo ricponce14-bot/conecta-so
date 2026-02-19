@@ -798,11 +798,165 @@ tr:hover td {
 
 .form-label {
     display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
     margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
+
+.form-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.form-checkbox-wrapper:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.checkbox-custom {
+    accent-color: var(--primary);
+    width: 18px;
+    height: 18px;
+}
+
+/* ================================================
+   MOBILE OPTIMIZATIONS
+   ================================================ */
+
+@media (max-width: 768px) {
+
+    /* Layout Adjustments */
+    .mobile-header {
+        display: flex;
+        padding: 0 16px;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 16px;
+        padding-top: 20px;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Header & Typography */
+    .page-header {
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .page-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .page-header p {
+        font-size: 0.9rem;
+    }
+
+    /* Grids */
+    .kpi-grid {
+        grid-template-columns: 1fr;
+        /* Stack KPIs */
+        gap: 16px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        /* Stack Form Fields */
+        gap: 16px;
+    }
+
+    /* Cards */
+    .card,
+    .kpi-card {
+        padding: 20px;
+    }
+
+    .kpi-value {
+        font-size: 1.8rem;
+    }
+
+    /* Tables */
+    .table-container {
+        margin: 0 -20px;
+        /* Bleed to edges inside card */
+        width: calc(100% + 40px);
+        padding-bottom: 8px;
+        /* Scrollbar hint */
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 600px;
+        /* Force scroll */
+    }
+
+    th,
+    td {
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Buttons & Actions */
+    .toolbar-filters {
+        flex-direction: column;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    /* Toolbar stack */
+    .toolbar {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .toolbar>div {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 24px 20px;
+        width: 94%;
+    }
+
+    .login-title {
+        font-size: 1.5rem;
+    }
+}
+
+
 
 .form-input,
 .form-textarea {
