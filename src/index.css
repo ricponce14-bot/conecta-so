@@ -928,10 +928,11 @@ tr:hover td {
     }
 
     /* Adjust Main Content for Double Header */
+    /* Adjust Main Content for Double Header */
     .main-content {
         margin-left: 0;
-        padding: 150px 16px 20px 16px;
-        /* Increased from 120px to safe 150px */
+        padding: 170px 16px 20px 16px !important;
+        /* FORCED UPDATE */
         width: 100%;
     }
 
