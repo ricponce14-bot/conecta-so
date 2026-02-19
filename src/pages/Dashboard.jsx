@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import { formatMoney, formatNumber, getDaysRemaining, getSmartAlerts, FINANCIAL } from '../lib/utils'
 import { Icons } from '../components/Icons'
 
 export default function Dashboard() {
+    const { profile, isAdmin } = useAuth() // Get role
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -11,163 +13,170 @@ export default function Dashboard() {
     useEffect(() => { fetchAll() }, [])
 
     async function fetchAll() {
-        try {
-            // Verify Supabase Connection
-            if (!supabase.supabaseUrl) throw new Error("Supabase URL missing")
+        // ... (existing fetch code)
+        // ...
+        const [expoRes, sponsorRes, ticketRes, costRes] = results
 
-            const results = await Promise.allSettled([
-                supabase.from('expo_leads').select('*'),
-                supabase.from('sponsor_leads').select('*'),
-                supabase.from('tickets').select('*'),
-                supabase.from('costs').select('*'),
-            ])
-
-            const [expoRes, sponsorRes, ticketRes, costRes] = results
-
-            const getData = (res, name) => {
-                if (res.status === 'fulfilled' && !res.value.error) {
-                    return res.value.data || []
-                }
-                const msg = `Error fetching ${name}: ${res.reason || res.value?.error?.message}`
-                console.warn(msg)
-                if (!error) setError(msg) // Capture first error
-                return []
+        const getData = (res, name) => {
+            if (res.status === 'fulfilled' && !res.value.error) {
+                return res.value.data || []
             }
-
-            setData({
-                expo: getData(expoRes, 'expo'),
-                sponsors: getData(sponsorRes, 'sponsors'),
-                tickets: getData(ticketRes, 'tickets'),
-                costs: getData(costRes, 'costs'),
-            })
-        } catch (err) {
-            console.error('Critical dashboard error:', err)
-            setError(err.message)
-        } finally {
-            setLoading(false)
+            const msg = `Error fetching ${name}: ${res.reason || res.value?.error?.message}`
+            console.warn(msg)
+            if (!error) setError(msg)
+            return []
         }
-    }
 
-    if (loading) return <div className="loading-spinner">Cargando datos...</div>
-    if (error) return (
-        <div className="alert alert-warning" style={{ margin: '20px' }}>
-            <Icons.AlertTriangle width={24} height={24} />
-            <div>
-                <strong>Error de Conexión:</strong> {error}
-                <br />
-                <small>Revise las variables de entorno en Vercel (VITE_SUPABASE_URL).</small>
+        setData({
+            expo: getData(expoRes, 'expo'),
+            sponsors: getData(sponsorRes, 'sponsors'),
+            tickets: getData(ticketRes, 'tickets'),
+            costs: getData(costRes, 'costs'),
+        })
+    } catch (err) {
+        console.error('Critical dashboard error:', err)
+        setError(err.message)
+    } finally {
+        setLoading(false)
+    }
+}
+
+if (loading) return <div className="loading-spinner">Cargando datos...</div>
+if (error) return (
+    <div className="alert alert-warning" style={{ margin: '20px' }}>
+        <Icons.AlertTriangle width={24} height={24} />
+        <div>
+            <strong>Error de Conexión:</strong> {error}
+            <br />
+            <small>Revise las variables de entorno en Vercel (VITE_SUPABASE_URL).</small>
+        </div>
+    </div>
+)
+if (!data) return null
+
+// --- Global Calculations (Admin) ---
+const expoCerrados = data.expo.filter(l => l.estado === 'CERRADO')
+const ingresoExpo = expoCerrados.reduce((s, l) => s + Number(l.precio_stand || 0), 0)
+const expoAnticipoPagado = data.expo.reduce((s, l) => s + Number(l.monto_pagado || 0), 0)
+
+const sponsorCerrados = data.sponsors.filter(l => l.estado === 'CERRADO')
+const ingresoSponsors = sponsorCerrados.reduce((s, l) => s + Number(l.valor_total || 0), 0)
+const sponsorPagado = data.sponsors.reduce((s, l) => s + Number(l.monto_pagado || 0), 0)
+
+const totalGen = data.tickets.reduce((s, t) => s + Number(t.generales_vendidos), 0)
+const totalVip = data.tickets.reduce((s, t) => s + Number(t.vip_vendidos), 0)
+const ingresoGeneral = totalGen * FINANCIAL.PRECIO_GENERAL
+const ingresoVip = totalVip * FINANCIAL.PRECIO_VIP
+const ingresoConsumo = data.tickets.reduce((s, t) => s + Number(t.consumo_estimado), 0)
+const ingresoTickets = ingresoGeneral + ingresoVip + ingresoConsumo
+
+const totalCosts = data.costs.reduce((s, c) => s + Number(c.total), 0)
+const totalPagado = data.costs.reduce((s, c) => s + Number(c.pagado), 0)
+
+const ingresoConfirmado = ingresoExpo + ingresoSponsors + ingresoTickets
+const utilidadProyectada = ingresoConfirmado - totalCosts
+const progress = FINANCIAL.META_INGRESOS > 0 ? ingresoConfirmado / FINANCIAL.META_INGRESOS : 0
+const daysRemaining = getDaysRemaining()
+const alerts = getSmartAlerts(progress, daysRemaining)
+const progressColor = utilidadProyectada >= FINANCIAL.META_UTILIDAD ? 'green' : utilidadProyectada > 0 ? 'yellow' : 'red'
+
+// --- Seller Calculations (Personal) ---
+const myExpo = data.expo.filter(l => l.vendedor_id === profile?.id)
+const mySponsors = data.sponsors.filter(l => l.vendedor_id === profile?.id)
+
+// Calculate My Sales (Only CLOSED/SOLD)
+const myExpoSales = myExpo
+    .filter(l => l.estado === 'CERRADO')
+    .reduce((s, l) => s + Number(l.precio_stand || 0), 0)
+
+const mySponsorSales = mySponsors
+    .filter(l => l.estado === 'CERRADO')
+    .reduce((s, l) => s + Number(l.valor_total || 0), 0)
+
+const myTotalSales = myExpoSales + mySponsorSales
+const myCommission = myTotalSales * 0.10 // 10% Commission Rule (Hardcoded per request)
+
+// Chart Data (Admin Only for now, or filtered for Seller?)
+// Simpler to just hide chart for seller or show empty
+const ticketsByDate = {}
+data.tickets.forEach(t => {
+    const key = t.fecha
+    const revenue = t.generales_vendidos * FINANCIAL.PRECIO_GENERAL + t.vip_vendidos * FINANCIAL.PRECIO_VIP + Number(t.consumo_estimado)
+    ticketsByDate[key] = (ticketsByDate[key] || 0) + revenue
+})
+const chartDates = Object.keys(ticketsByDate).sort()
+const chartValues = chartDates.map(d => ticketsByDate[d])
+const chartMax = Math.max(...chartValues, 1)
+
+// Derived Breakdown
+const breakdown = [
+    { label: 'Expo', value: ingresoExpo },
+    { label: 'Patrocinios', value: ingresoSponsors },
+    { label: 'Boletos', value: ingresoTickets },
+    { label: 'Consumo', value: ingresoConsumo },
+]
+
+return (
+    <div>
+        {/* Countdown Banner */}
+        <div className="countdown-banner card" style={{
+            marginBottom: '32px',
+            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+            color: 'white',
+            padding: '32px',
+            position: 'relative',
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
+        }}>
+            <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
+                    <div>
+                        <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em', color: 'white' }}>Conecta 2026 Admin</h2>
+                        <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>Meta: 18 de abril de 2026</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{daysRemaining}</span>
+                        <span style={{ fontSize: '1rem', opacity: 0.8, marginLeft: '6px' }}>días restantes</span>
+                    </div>
+                </div>
+
+                {/* Progress Bar Container */}
+                <div style={{
+                    height: '16px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '99px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                }}>
+                    {/* Progress Fill */}
+                    <div style={{
+                        width: `${Math.max(5, Math.min(100, ((365 - daysRemaining) / 365) * 100))}%`, // Mock calc based on year
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%)',
+                        borderRadius: '99px',
+                        transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 0 15px rgba(6, 182, 212, 0.5)'
+                    }} />
+                </div>
+            </div>
+
+            {/* Decoration */}
+            <div style={{ position: 'absolute', right: '-10px', bottom: '-40px', opacity: 0.1, transform: 'rotate(-5deg) scale(1.5)' }}>
+                <Icons.Calendar width={180} height={180} />
             </div>
         </div>
-    )
-    if (!data) return null
 
-    // Calculations
-    const expoCerrados = data.expo.filter(l => l.estado === 'CERRADO')
-    const ingresoExpo = expoCerrados.reduce((s, l) => s + Number(l.precio_stand || 0), 0)
-    const expoAnticipoPagado = data.expo.reduce((s, l) => s + Number(l.monto_pagado || 0), 0)
-
-    const sponsorCerrados = data.sponsors.filter(l => l.estado === 'CERRADO')
-    const ingresoSponsors = sponsorCerrados.reduce((s, l) => s + Number(l.valor_total || 0), 0)
-    const sponsorPagado = data.sponsors.reduce((s, l) => s + Number(l.monto_pagado || 0), 0)
-
-    const totalGen = data.tickets.reduce((s, t) => s + Number(t.generales_vendidos), 0)
-    const totalVip = data.tickets.reduce((s, t) => s + Number(t.vip_vendidos), 0)
-    const ingresoGeneral = totalGen * FINANCIAL.PRECIO_GENERAL
-    const ingresoVip = totalVip * FINANCIAL.PRECIO_VIP
-    const ingresoConsumo = data.tickets.reduce((s, t) => s + Number(t.consumo_estimado), 0)
-    const ingresoTickets = ingresoGeneral + ingresoVip + ingresoConsumo
-
-    const totalCosts = data.costs.reduce((s, c) => s + Number(c.total), 0)
-    const totalPagado = data.costs.reduce((s, c) => s + Number(c.pagado), 0)
-
-    const ingresoConfirmado = ingresoExpo + ingresoSponsors + ingresoTickets
-    const utilidadProyectada = ingresoConfirmado - totalCosts
-    const cajaReal = expoAnticipoPagado + sponsorPagado + ingresoTickets - totalPagado
-    const progress = FINANCIAL.META_INGRESOS > 0 ? ingresoConfirmado / FINANCIAL.META_INGRESOS : 0
-    const daysRemaining = getDaysRemaining()
-    const alerts = getSmartAlerts(progress, daysRemaining)
-
-    const progressColor = utilidadProyectada >= FINANCIAL.META_UTILIDAD ? 'green' : utilidadProyectada > 0 ? 'yellow' : 'red'
-
-    // Revenue breakdown
-    const breakdown = [
-        { label: 'Expo', value: ingresoExpo },
-        { label: 'Patrocinios', value: ingresoSponsors },
-        { label: 'Boletos', value: ingresoTickets },
-        { label: 'Consumo', value: ingresoConsumo },
-    ]
-
-    // Chart data — revenue by date
-    const ticketsByDate = {}
-    data.tickets.forEach(t => {
-        const key = t.fecha
-        const revenue = t.generales_vendidos * FINANCIAL.PRECIO_GENERAL + t.vip_vendidos * FINANCIAL.PRECIO_VIP + Number(t.consumo_estimado)
-        ticketsByDate[key] = (ticketsByDate[key] || 0) + revenue
-    })
-    const chartDates = Object.keys(ticketsByDate).sort()
-    const chartValues = chartDates.map(d => ticketsByDate[d])
-    const chartMax = Math.max(...chartValues, 1)
-
-    return (
-        <div>
-            {/* Countdown Banner */}
-            <div className="countdown-banner card" style={{
-                marginBottom: '32px',
-                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-                color: 'white',
-                padding: '32px',
-                position: 'relative',
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-            }}>
-                <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
-                        <div>
-                            <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em', color: 'white' }}>Conecta 2026 Admin</h2>
-                            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>Meta: 18 de abril de 2026</p>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{daysRemaining}</span>
-                            <span style={{ fontSize: '1rem', opacity: 0.8, marginLeft: '6px' }}>días restantes</span>
-                        </div>
-                    </div>
-
-                    {/* Progress Bar Container */}
-                    <div style={{
-                        height: '16px',
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        borderRadius: '99px',
-                        overflow: 'hidden',
-                        position: 'relative'
-                    }}>
-                        {/* Progress Fill */}
-                        <div style={{
-                            width: `${Math.max(5, Math.min(100, ((365 - daysRemaining) / 365) * 100))}%`, // Mock calc based on year
-                            height: '100%',
-                            background: 'linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%)',
-                            borderRadius: '99px',
-                            transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: '0 0 15px rgba(6, 182, 212, 0.5)'
-                        }} />
-                    </div>
-                </div>
-
-                {/* Decoration */}
-                <div style={{ position: 'absolute', right: '-10px', bottom: '-40px', opacity: 0.1, transform: 'rotate(-5deg) scale(1.5)' }}>
-                    <Icons.Calendar width={180} height={180} />
-                </div>
+        {/* Smart Alerts */}
+        {isAdmin && alerts.map((a, i) => (
+            <div key={i} className={`alert alert-${a.type}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Icons.AlertTriangle width={18} height={18} />
+                {a.message}
             </div>
+        ))}
 
-            {/* Smart Alerts */}
-            {alerts.map((a, i) => (
-                <div key={i} className={`alert alert-${a.type}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Icons.AlertTriangle width={18} height={18} />
-                    {a.message}
-                </div>
-            ))}
-
-            {/* Revenue Progress */}
+        {/* Admin: Revenue Progress | Seller: Motivational Message */}
+        {isAdmin ? (
             <div className="progress-section card" style={{ padding: '24px 32px' }}>
                 <div className="progress-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -187,36 +196,80 @@ export default function Dashboard() {
                     <div className={`progress-fill ${progressColor}`} style={{ width: `${Math.min(100, progress * 100)}%`, transition: 'width 1s ease' }} />
                 </div>
             </div>
-
-            {/* KPI Grid */}
-            <div className="kpi-grid">
-                <div className="kpi-card blue">
-                    <div className="kpi-label">Prospectos Expo</div>
-                    <div className="kpi-value">{data.expo.length}</div>
-                    <div className="kpi-sub">{expoCerrados.length} cerrados</div>
-                    <div className="kpi-icon-bg"><Icons.Briefcase /></div>
-                </div>
-                <div className="kpi-card purple">
-                    <div className="kpi-label">Prospectos Sponsors</div>
-                    <div className="kpi-value">{data.sponsors.length}</div>
-                    <div className="kpi-sub">{sponsorCerrados.length} cerrados</div>
-                    <div className="kpi-icon-bg"><Icons.Handshake /></div>
-                </div>
-                <div className="kpi-card green">
-                    <div className="kpi-label">Boletos Vendidos</div>
-                    <div className="kpi-value">{formatNumber(totalGen + totalVip)}</div>
-                    <div className="kpi-sub">{formatMoney(ingresoTickets)}</div>
-                    <div className="kpi-icon-bg"><Icons.Ticket /></div>
-                </div>
-                <div className={`kpi-card ${utilidadProyectada >= 0 ? 'green' : 'red'}`}>
-                    <div className="kpi-label">Utilidad Proyectada</div>
-                    <div className="kpi-value money">{formatMoney(utilidadProyectada)}</div>
-                    <div className="kpi-sub">vs. Costos: {formatMoney(totalCosts)}</div>
-                    <div className="kpi-icon-bg"><Icons.DollarSign /></div>
+        ) : (
+            // SELLER VIEW: Performance Summary
+            <div className="card" style={{ padding: '24px 32px', marginBottom: '24px', background: 'var(--bg-surface)' }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Mi Desempeño</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
+                    <div>
+                        <span className="label">Ventas Totales</span>
+                        <div className="money" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}>
+                            {formatMoney(myTotalSales)}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Expo + Sponsors</div>
+                    </div>
+                    <div>
+                        <span className="label">Comisión Estimada</span>
+                        <div className="money" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--success)' }}>
+                            {formatMoney(myCommission)}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>10% sobre ventas</div>
+                    </div>
                 </div>
             </div>
+        )}
 
-            {/* Revenue Breakdown */}
+        {/* KPI Grid */}
+        <div className="kpi-grid">
+            {isAdmin ? (
+                // ADMIN KPIs
+                <>
+                    <div className="kpi-card blue">
+                        <div className="kpi-label">Prospectos Expo</div>
+                        <div className="kpi-value">{data.expo.length}</div>
+                        <div className="kpi-sub">{expoCerrados.length} cerrados</div>
+                        <div className="kpi-icon-bg"><Icons.Briefcase /></div>
+                    </div>
+                    <div className="kpi-card purple">
+                        <div className="kpi-label">Prospectos Sponsors</div>
+                        <div className="kpi-value">{data.sponsors.length}</div>
+                        <div className="kpi-sub">{sponsorCerrados.length} cerrados</div>
+                        <div className="kpi-icon-bg"><Icons.Handshake /></div>
+                    </div>
+                    <div className="kpi-card green">
+                        <div className="kpi-label">Boletos Vendidos</div>
+                        <div className="kpi-value">{formatNumber(totalGen + totalVip)}</div>
+                        <div className="kpi-sub">{formatMoney(ingresoTickets)}</div>
+                        <div className="kpi-icon-bg"><Icons.Ticket /></div>
+                    </div>
+                    <div className={`kpi-card ${utilidadProyectada >= 0 ? 'green' : 'red'}`}>
+                        <div className="kpi-label">Utilidad Proyectada</div>
+                        <div className="kpi-value money">{formatMoney(utilidadProyectada)}</div>
+                        <div className="kpi-sub">vs. Costos: {formatMoney(totalCosts)}</div>
+                        <div className="kpi-icon-bg"><Icons.DollarSign /></div>
+                    </div>
+                </>
+            ) : (
+                // SELLER KPIs (Simplified)
+                <>
+                    <div className="kpi-card blue">
+                        <div className="kpi-label">Mis Prospectos Expo</div>
+                        <div className="kpi-value">{myExpo.length}</div>
+                        <div className="kpi-sub">{myExpo.filter(l => l.estado === 'CERRADO').length} cerrados</div>
+                        <div className="kpi-icon-bg"><Icons.Briefcase /></div>
+                    </div>
+                    <div className="kpi-card purple">
+                        <div className="kpi-label">Mis Sponsors</div>
+                        <div className="kpi-value">{mySponsors.length}</div>
+                        <div className="kpi-sub">{mySponsors.filter(l => l.estado === 'CERRADO').length} cerrados</div>
+                        <div className="kpi-icon-bg"><Icons.Handshake /></div>
+                    </div>
+                </>
+            )}
+        </div>
+
+        {/* Admin Only: Financial Breakdown */}
+        {isAdmin && (
             <div className="grid-2-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
                 <div className="card">
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -269,6 +322,7 @@ export default function Dashboard() {
                     )}
                 </div>
             </div>
-        </div>
-    )
+        )}
+    </div>
+)
 }
