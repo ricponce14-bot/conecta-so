@@ -26,7 +26,7 @@ export default function Layout() {
         <div className="app-layout">
             {/* Mobile Header */}
             <header className="mobile-header">
-                <img src="/logo.png" alt="Conecta" className="mobile-logo" />
+                <img src="/logo1.png" alt="Conecta" className="mobile-logo" />
                 <button className="menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
                     {isSidebarOpen ? <Icons.X /> : <Icons.Menu />}
                 </button>
@@ -41,7 +41,7 @@ export default function Layout() {
             {/* Sidebar */}
             <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
-                    <img src="/logo.png" alt="Conecta 2026" className="brand-logo" />
+                    <img src="/logo1.png" alt="Conecta 2026" className="brand-logo" />
                 </div>
 
                 <nav className="sidebar-nav">
