@@ -111,9 +111,14 @@ export default function Login() {
         <div className="login-page">
             <NeuralBackground />
 
+            {/* import logo from '../assets/logo1.png' */}
+
+            {/* // ... (existing imports) */}
+
+            {/* // ... inside component */}
             <div className="login-card">
                 <div className="login-brand">
-                    <img src="/logo1.png" alt="Conecta 2026" className="login-logo" />
+                    <img src={logo} alt="Conecta 2026" className="login-logo" />
                     <h1 className="login-title">Conecta 2026</h1>
                     <p className="login-tagline">Sistema de Gestión de Eventos</p>
                     <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '4px' }}>v2.1 LATEST</p>

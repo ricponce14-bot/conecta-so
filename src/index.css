@@ -618,14 +618,24 @@ tr:hover td {
 }
 
 .login-submit {
-    background: #1e1b4b;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
     color: white;
-    transition: transform 0.2s;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(30, 27, 75, 0.2);
 }
 
 .login-submit:hover {
-    background: #312e81;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(30, 27, 75, 0.3);
+    background: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
 }
 
 /* Form Styles */
