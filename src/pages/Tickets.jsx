@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatMoney, formatDate, FINANCIAL } from '../lib/utils'
+import { Icons } from '../components/Icons'
 
 export default function Tickets() {
     const [tickets, setTickets] = useState([])
@@ -113,28 +114,46 @@ export default function Tickets() {
             </div>
 
             {showForm && (
-                <div className="card" style={{ marginBottom: '24px' }}>
+                <div className="card" style={{ maxWidth: '800px', margin: '0 auto 40px auto' }}>
                     <form onSubmit={handleSubmit}>
+                        <div className="form-section-title">
+                            <Icons.Ticket width={18} height={18} /> Registro de Venta Diaria
+                        </div>
+
                         <div className="form-grid">
                             <div className="form-group">
-                                <label>Fecha</label>
-                                <input name="fecha" type="date" value={form.fecha} onChange={handleChange} required />
+                                <label className="form-label">Fecha del Reporte</label>
+                                <div style={{ position: 'relative' }}>
+                                    <input className="form-input" name="fecha" type="date" value={form.fecha} onChange={handleChange} required />
+                                </div>
                             </div>
+
                             <div className="form-group">
-                                <label>Generales vendidos</label>
-                                <input name="generales_vendidos" type="number" value={form.generales_vendidos} onChange={handleChange} min="0" />
+                                <label className="form-label">Boletos Generales ({formatMoney(FINANCIAL.PRECIO_GENERAL)})</label>
+                                <input className="form-input" name="generales_vendidos" type="number" value={form.generales_vendidos} onChange={handleChange} min="0" placeholder="0" />
                             </div>
+
                             <div className="form-group">
-                                <label>VIP vendidos</label>
-                                <input name="vip_vendidos" type="number" value={form.vip_vendidos} onChange={handleChange} min="0" />
+                                <label className="form-label">Boletos VIP ({formatMoney(FINANCIAL.PRECIO_VIP)})</label>
+                                <input className="form-input" name="vip_vendidos" type="number" value={form.vip_vendidos} onChange={handleChange} min="0" placeholder="0" />
                             </div>
+
                             <div className="form-group">
-                                <label>Consumo estimado (MXN)</label>
-                                <input name="consumo_estimado" type="number" step="0.01" value={form.consumo_estimado} onChange={handleChange} min="0" />
+                                <label className="form-label">Consumo Estimado (MXN)</label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '12px', top: '10px', color: '#94a3b8' }}>$</span>
+                                    <input className="form-input" style={{ paddingLeft: '28px' }} name="consumo_estimado" type="number" step="0.01" value={form.consumo_estimado} onChange={handleChange} min="0" placeholder="0.00" />
+                                </div>
                             </div>
                         </div>
-                        <div className="form-actions">
-                            <button type="submit" className="btn btn-primary">{editId ? 'Actualizar' : 'Guardar'}</button>
+
+                        <div className="form-actions" style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '24px' }}>
+                            <button type="button" className="btn" style={{ color: '#64748b' }} onClick={() => { setShowForm(false); setEditId(null); }}>
+                                Cancelar
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                                {editId ? 'Actualizar Registro' : 'Registrar Venta'}
+                            </button>
                         </div>
                     </form>
                 </div>
