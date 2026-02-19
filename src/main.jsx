@@ -10,13 +10,7 @@ window.addEventListener('error', (event) => {
     document.body.appendChild(errorBox);
 });
 
-// Check for missing env vars
-if (!import.meta.env.VITE_SUPABASE_URL) {
-    const warningBox = document.createElement('div');
-    warningBox.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;background:#fff3cd;color:#856404;padding:10px;z-index:9999;font-family:sans-serif;text-align:center;border-top:1px solid #ffeeba;';
-    warningBox.innerText = '⚠️ VITE_SUPABASE_URL missing in environment variables';
-    document.body.appendChild(warningBox);
-}
+
 
 createRoot(document.getElementById('app')).render(
     <StrictMode>
