@@ -9,22 +9,44 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        let mounted = true
+
+        // Safety timeout in case getSession hangs
+        const timeout = setTimeout(() => {
+            if (mounted) setLoading(false)
+        }, 3000)
+
         supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!mounted) return
             setUser(session?.user ?? null)
-            if (session?.user) fetchProfile(session.user.id)
-            else setLoading(false)
+            if (session?.user) {
+                fetchProfile(session.user.id).catch(() => setLoading(false))
+            } else {
+                setLoading(false)
+            }
+        }).catch(err => {
+            console.error('Auth check failed:', err)
+            if (mounted) setLoading(false)
+        }).finally(() => {
+            clearTimeout(timeout)
         })
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!mounted) return
             setUser(session?.user ?? null)
-            if (session?.user) fetchProfile(session.user.id)
-            else {
+            if (session?.user) {
+                fetchProfile(session.user.id).catch(() => setLoading(false))
+            } else {
                 setProfile(null)
                 setLoading(false)
             }
         })
 
-        return () => subscription.unsubscribe()
+        return () => {
+            mounted = false
+            clearTimeout(timeout)
+            subscription.unsubscribe()
+        }
     }, [])
 
     async function fetchProfile(userId) {

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
@@ -15,8 +16,26 @@ import './index.css'
 
 function AppRoutes() {
     const { user, loading } = useAuth()
+    const [showLongLoading, setShowLongLoading] = useState(false)
 
-    if (loading) return <div className="loading-spinner">Cargando sistema...</div>
+    useEffect(() => {
+        const timer = setTimeout(() => setShowLongLoading(true), 3000)
+        return () => clearTimeout(timer)
+    }, [])
+
+    if (loading) {
+        return (
+            <div className="loading-spinner" style={{ flexDirection: 'column', gap: '15px' }}>
+                <div className="spinner-ring"></div>
+                <div>Cargando sistema...</div>
+                {showLongLoading && (
+                    <div style={{ fontSize: '0.8rem', color: '#ffc107', maxWidth: '300px', textAlign: 'center' }}>
+                        Tarda más de lo esperado. Verifica tu conexión o recarga la página.
+                    </div>
+                )}
+            </div>
+        )
+    }
 
     return (
         <Routes>
