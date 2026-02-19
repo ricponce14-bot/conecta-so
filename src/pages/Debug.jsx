@@ -26,7 +26,8 @@ export default function Debug() {
         })
         addLog(`Env URL: ${url ? 'OK' : 'MISSING'}`, url ? 'success' : 'error')
 
-        if (!url || !key) return
+        // Proceed even if missing, to test if Fallback works
+        if (!key) addLog('⚠️ Key missing in Env, testing Fallback...', 'warning')
 
         // 2. Ping Supabase
         try {
