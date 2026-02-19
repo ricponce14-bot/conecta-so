@@ -930,8 +930,8 @@ tr:hover td {
     /* Adjust Main Content for Double Header */
     .main-content {
         margin-left: 0;
-        padding: 120px 16px 20px 16px;
-        /* 56+56+padding */
+        padding: 150px 16px 20px 16px;
+        /* Increased from 120px to safe 150px */
         width: 100%;
     }
 
