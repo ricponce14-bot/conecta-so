@@ -76,7 +76,7 @@ export default function SponsorLeadForm() {
     return (
         <div>
             <div className="page-header">
-                <h2>{isNew ? '➕ Nuevo Patrocinio' : '✏️ Editar Patrocinio'}</h2>
+                <h2>{isNew ? 'Nuevo Patrocinio' : 'Editar Patrocinio'}</h2>
                 <p>{isNew ? 'Registrar nuevo prospecto de patrocinio' : `Editando: ${form.empresa}`}</p>
             </div>
 
@@ -84,11 +84,11 @@ export default function SponsorLeadForm() {
                 <form onSubmit={handleSubmit}>
                     <div className="form-grid">
                         <div className="form-group">
-                            <label>Empresa *</label>
+                            <label>Empresa</label>
                             <input name="empresa" value={form.empresa} onChange={handleChange} required />
                         </div>
                         <div className="form-group">
-                            <label>Contacto *</label>
+                            <label>Contacto</label>
                             <input name="contacto" value={form.contacto} onChange={handleChange} required />
                         </div>
                         <div className="form-group">
@@ -120,7 +120,7 @@ export default function SponsorLeadForm() {
                         </div>
                         <div className="form-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', paddingTop: '24px' }}>
                             <input name="anticipo_pagado" type="checkbox" checked={form.anticipo_pagado} onChange={handleChange} />
-                            <label style={{ textTransform: 'none', margin: 0 }}>Anticipo pagado</label>
+                            <label style={{ textTransform: 'none', margin: 0 }}>Anticipo cubierto</label>
                         </div>
                         <div className="form-group">
                             <label>Fecha de Seguimiento</label>
@@ -133,7 +133,7 @@ export default function SponsorLeadForm() {
                     </div>
                     <div className="form-actions">
                         <button type="submit" className="btn btn-primary" disabled={saving}>
-                            {saving ? 'Guardando...' : (isNew ? 'Crear Patrocinio' : 'Guardar Cambios')}
+                            {saving ? 'Guardando...' : (isNew ? 'Registrar Patrocinio' : 'Guardar Cambios')}
                         </button>
                         <button type="button" className="btn btn-secondary" onClick={() => navigate('/sponsors')}>
                             Cancelar

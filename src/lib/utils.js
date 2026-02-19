@@ -8,12 +8,10 @@ export function formatMoney(amount) {
     }).format(amount || 0)
 }
 
-// Format number with commas
 export function formatNumber(num) {
     return new Intl.NumberFormat('es-MX').format(num || 0)
 }
 
-// Format date to readable Spanish
 export function formatDate(dateStr) {
     if (!dateStr) return '—'
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-MX', {
@@ -23,7 +21,6 @@ export function formatDate(dateStr) {
     })
 }
 
-// Calculate days remaining until event
 export function getDaysRemaining() {
     const eventDate = new Date('2026-04-18')
     const now = new Date()
@@ -31,7 +28,6 @@ export function getDaysRemaining() {
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
 }
 
-// Financial constants
 export const FINANCIAL = {
     PRECIO_GENERAL: 300,
     PRECIO_VIP: 700,
@@ -43,19 +39,18 @@ export const FINANCIAL = {
     EVENT_DATE: '2026-04-18',
 }
 
-// Get smart alert status
 export function getSmartAlerts(progress, daysRemaining) {
     const alerts = []
     const progressPercent = progress * 100
 
     if (progress >= 1) {
-        alerts.push({ type: 'success', message: '🎉 ¡Punto de equilibrio alcanzado! El evento es rentable.' })
+        alerts.push({ type: 'success', message: 'Punto de equilibrio alcanzado. El evento es rentable.' })
     }
 
     if (daysRemaining < 30 && progressPercent < 60) {
-        alerts.push({ type: 'danger', message: `⚠️ ALERTA ROJA: Faltan ${daysRemaining} días y el avance es solo ${progressPercent.toFixed(0)}%. Se requiere acción inmediata.` })
+        alerts.push({ type: 'danger', message: `ALERTA CRITICA: Faltan ${daysRemaining} dias y el avance es ${progressPercent.toFixed(0)}%. Se requiere accion inmediata.` })
     } else if (daysRemaining < 60 && progressPercent < 30) {
-        alerts.push({ type: 'warning', message: `⚡ ALERTA: Faltan ${daysRemaining} días y el avance es ${progressPercent.toFixed(0)}%. Acelerar esfuerzos comerciales.` })
+        alerts.push({ type: 'warning', message: `ALERTA: Faltan ${daysRemaining} dias y el avance es ${progressPercent.toFixed(0)}%. Acelerar esfuerzos comerciales.` })
     }
 
     return alerts

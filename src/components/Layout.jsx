@@ -12,38 +12,38 @@ export default function Layout() {
 
     const initials = profile?.name
         ? profile.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()
-        : '??'
+        : '—'
 
     return (
         <div className="app-layout">
             <aside className="sidebar">
                 <div className="sidebar-header">
-                    <h1>CONNECTA OS</h1>
-                    <div className="subtitle">Sistema Operativo 2026</div>
+                    <h1>Conecta 2026</h1>
+                    <div className="subtitle">Transforma tu mente</div>
                 </div>
 
                 <nav className="sidebar-nav">
                     <NavLink to="/" end>
-                        <span className="nav-icon">📊</span> Dashboard
+                        <span className="nav-icon">—</span> Dashboard
                     </NavLink>
                     <NavLink to="/expo">
-                        <span className="nav-icon">🏢</span> Expo Stands
+                        <span className="nav-icon">—</span> Expo
                     </NavLink>
                     <NavLink to="/sponsors">
-                        <span className="nav-icon">🤝</span> Patrocinios
+                        <span className="nav-icon">—</span> Patrocinios
                     </NavLink>
                     {isAdmin && (
                         <NavLink to="/tickets">
-                            <span className="nav-icon">🎫</span> Boletos
+                            <span className="nav-icon">—</span> Boletos
                         </NavLink>
                     )}
                     {isAdmin && (
                         <NavLink to="/costs">
-                            <span className="nav-icon">💰</span> Costos
+                            <span className="nav-icon">—</span> Costos
                         </NavLink>
                     )}
                     <NavLink to="/kpis">
-                        <span className="nav-icon">🏆</span> KPIs Ventas
+                        <span className="nav-icon">—</span> KPIs
                     </NavLink>
                 </nav>
 
@@ -55,7 +55,7 @@ export default function Layout() {
                             <div className="user-role">{profile?.role || ''}</div>
                         </div>
                         <button className="btn-logout" onClick={handleLogout} title="Cerrar sesión">
-                            ⏻
+                            Salir
                         </button>
                     </div>
                 </div>

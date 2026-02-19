@@ -30,7 +30,7 @@ export default function SponsorLeads() {
     }
 
     async function handleDelete(id) {
-        if (!confirm('¿Eliminar este patrocinio?')) return
+        if (!confirm('Confirmar eliminacion del registro.')) return
         await supabase.from('sponsor_leads').delete().eq('id', id)
         setLeads(leads.filter(l => l.id !== id))
     }
@@ -46,18 +46,18 @@ export default function SponsorLeads() {
         .filter(l => l.estado === 'CERRADO')
         .reduce((s, l) => s + Number(l.valor_total || 0), 0)
 
-    if (loading) return <div className="loading-spinner">Cargando patrocinios...</div>
+    if (loading) return <div className="loading-spinner">Cargando datos...</div>
 
     return (
         <div>
             <div className="page-header">
-                <h2>🤝 CRM — Patrocinios</h2>
-                <p>Gestión de sponsors para CONNECTA 2026</p>
+                <h2>CRM Patrocinios</h2>
+                <p>Gestion de sponsors para Conecta 2026</p>
             </div>
 
             <div className="kpi-grid">
                 <div className="kpi-card blue">
-                    <div className="kpi-label">Total Prospectos</div>
+                    <div className="kpi-label">Total prospectos</div>
                     <div className="kpi-value">{leads.length}</div>
                 </div>
                 <div className="kpi-card green">
@@ -65,7 +65,7 @@ export default function SponsorLeads() {
                     <div className="kpi-value">{cerrados}</div>
                 </div>
                 <div className="kpi-card purple">
-                    <div className="kpi-label">Ingreso Confirmado</div>
+                    <div className="kpi-label">Ingreso confirmado</div>
                     <div className="kpi-value money">{formatMoney(ingresoConfirmado)}</div>
                 </div>
             </div>
@@ -81,7 +81,7 @@ export default function SponsorLeads() {
                         {NIVELES.map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
                 </div>
-                <Link to="/sponsors/new" className="btn btn-primary">+ Nuevo Patrocinio</Link>
+                <Link to="/sponsors/new" className="btn btn-primary">Nuevo Patrocinio</Link>
             </div>
 
             <div className="card">
@@ -102,7 +102,7 @@ export default function SponsorLeads() {
                         </thead>
                         <tbody>
                             {filtered.length === 0 ? (
-                                <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No hay patrocinios registrados</td></tr>
+                                <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Sin registros</td></tr>
                             ) : filtered.map(lead => (
                                 <tr key={lead.id}>
                                     <td style={{ fontWeight: 600 }}>{lead.empresa}</td>
@@ -117,7 +117,7 @@ export default function SponsorLeads() {
                                         <div style={{ display: 'flex', gap: '6px' }}>
                                             <Link to={`/sponsors/${lead.id}`} className="btn btn-secondary btn-sm">Editar</Link>
                                             {isAdmin && (
-                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm">✕</button>
+                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm">Eliminar</button>
                                             )}
                                         </div>
                                     </td>

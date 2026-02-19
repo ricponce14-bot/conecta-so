@@ -54,12 +54,11 @@ export default function Tickets() {
     }
 
     async function handleDelete(id) {
-        if (!confirm('¿Eliminar este registro?')) return
+        if (!confirm('Confirmar eliminacion del registro.')) return
         await supabase.from('tickets').delete().eq('id', id)
         fetchTickets()
     }
 
-    // Totals
     const totalGen = tickets.reduce((s, t) => s + Number(t.generales_vendidos), 0)
     const totalVip = tickets.reduce((s, t) => s + Number(t.vip_vendidos), 0)
     const totalConsumo = tickets.reduce((s, t) => s + Number(t.consumo_estimado), 0)
@@ -67,32 +66,32 @@ export default function Tickets() {
     const ingresoVip = totalVip * FINANCIAL.PRECIO_VIP
     const ingresoTotal = ingresoGen + ingresoVip + totalConsumo
 
-    if (loading) return <div className="loading-spinner">Cargando boletos...</div>
+    if (loading) return <div className="loading-spinner">Cargando datos...</div>
 
     return (
         <div>
             <div className="page-header">
-                <h2>🎫 Control de Boletos</h2>
+                <h2>Control de Boletos</h2>
                 <p>Registro y seguimiento de venta de boletos</p>
             </div>
 
             <div className="kpi-grid">
                 <div className="kpi-card orange">
-                    <div className="kpi-label">Generales Vendidos</div>
+                    <div className="kpi-label">Generales vendidos</div>
                     <div className="kpi-value">{totalGen}</div>
-                    <div className="kpi-sub">{formatMoney(ingresoGen)} (${FINANCIAL.PRECIO_GENERAL}/boleto)</div>
+                    <div className="kpi-sub">{formatMoney(ingresoGen)} ({formatMoney(FINANCIAL.PRECIO_GENERAL)}/boleto)</div>
                 </div>
                 <div className="kpi-card purple">
-                    <div className="kpi-label">VIP Vendidos</div>
+                    <div className="kpi-label">VIP vendidos</div>
                     <div className="kpi-value">{totalVip}</div>
-                    <div className="kpi-sub">{formatMoney(ingresoVip)} (${FINANCIAL.PRECIO_VIP}/boleto)</div>
+                    <div className="kpi-sub">{formatMoney(ingresoVip)} ({formatMoney(FINANCIAL.PRECIO_VIP)}/boleto)</div>
                 </div>
                 <div className="kpi-card blue">
-                    <div className="kpi-label">Consumo Estimado</div>
+                    <div className="kpi-label">Consumo estimado</div>
                     <div className="kpi-value money">{formatMoney(totalConsumo)}</div>
                 </div>
                 <div className="kpi-card green">
-                    <div className="kpi-label">Ingreso Total Boletos</div>
+                    <div className="kpi-label">Ingreso total boletos</div>
                     <div className="kpi-value money">{formatMoney(ingresoTotal)}</div>
                 </div>
             </div>
@@ -100,7 +99,7 @@ export default function Tickets() {
             <div className="toolbar">
                 <div></div>
                 <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ fecha: new Date().toISOString().split('T')[0], generales_vendidos: 0, vip_vendidos: 0, consumo_estimado: 0 }); }}>
-                    {showForm ? 'Cancelar' : '+ Registrar Venta'}
+                    {showForm ? 'Cancelar' : 'Registrar Venta'}
                 </button>
             </div>
 
@@ -113,15 +112,15 @@ export default function Tickets() {
                                 <input name="fecha" type="date" value={form.fecha} onChange={handleChange} required />
                             </div>
                             <div className="form-group">
-                                <label>Generales Vendidos</label>
+                                <label>Generales vendidos</label>
                                 <input name="generales_vendidos" type="number" value={form.generales_vendidos} onChange={handleChange} min="0" />
                             </div>
                             <div className="form-group">
-                                <label>VIP Vendidos</label>
+                                <label>VIP vendidos</label>
                                 <input name="vip_vendidos" type="number" value={form.vip_vendidos} onChange={handleChange} min="0" />
                             </div>
                             <div className="form-group">
-                                <label>Consumo Estimado (MXN)</label>
+                                <label>Consumo estimado (MXN)</label>
                                 <input name="consumo_estimado" type="number" step="0.01" value={form.consumo_estimado} onChange={handleChange} min="0" />
                             </div>
                         </div>
@@ -149,7 +148,7 @@ export default function Tickets() {
                         </thead>
                         <tbody>
                             {tickets.length === 0 ? (
-                                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No hay registros de boletos</td></tr>
+                                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Sin registros</td></tr>
                             ) : tickets.map(t => {
                                 const ig = t.generales_vendidos * FINANCIAL.PRECIO_GENERAL
                                 const iv = t.vip_vendidos * FINANCIAL.PRECIO_VIP
@@ -165,7 +164,7 @@ export default function Tickets() {
                                         <td>
                                             <div style={{ display: 'flex', gap: '6px' }}>
                                                 <button onClick={() => startEdit(t)} className="btn btn-secondary btn-sm">Editar</button>
-                                                <button onClick={() => handleDelete(t.id)} className="btn btn-danger btn-sm">✕</button>
+                                                <button onClick={() => handleDelete(t.id)} className="btn btn-danger btn-sm">Eliminar</button>
                                             </div>
                                         </td>
                                     </tr>

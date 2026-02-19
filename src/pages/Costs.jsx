@@ -31,18 +31,18 @@ export default function Costs() {
     const totalPagado = costs.reduce((s, c) => s + Number(c.pagado), 0)
     const totalPendiente = totalCostos - totalPagado
 
-    if (loading) return <div className="loading-spinner">Cargando costos...</div>
+    if (loading) return <div className="loading-spinner">Cargando datos...</div>
 
     return (
         <div>
             <div className="page-header">
-                <h2>💰 Control de Costos</h2>
+                <h2>Control de Costos</h2>
                 <p>Seguimiento de gastos fijos del evento</p>
             </div>
 
             <div className="kpi-grid">
                 <div className="kpi-card red">
-                    <div className="kpi-label">Costos Totales</div>
+                    <div className="kpi-label">Costos totales</div>
                     <div className="kpi-value money">{formatMoney(totalCostos)}</div>
                 </div>
                 <div className="kpi-card yellow">
@@ -56,7 +56,6 @@ export default function Costs() {
                 </div>
             </div>
 
-            {/* Progress bar for costs paid */}
             <div className="progress-section">
                 <div className="progress-header">
                     <span className="label">Avance de pagos</span>
@@ -79,7 +78,7 @@ export default function Costs() {
                                 <th style={{ textAlign: 'right' }}>Total</th>
                                 <th style={{ textAlign: 'right' }}>Pagado</th>
                                 <th style={{ textAlign: 'right' }}>Pendiente</th>
-                                <th style={{ textAlign: 'right' }}>% Pagado</th>
+                                <th style={{ textAlign: 'right' }}>Avance</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -98,13 +97,13 @@ export default function Costs() {
                                                     step="0.01"
                                                     value={editPagado}
                                                     onChange={e => setEditPagado(e.target.value)}
-                                                    style={{ width: '120px', background: 'var(--bg-input)', border: '1px solid var(--border-focus)', borderRadius: '6px', padding: '6px 10px', color: 'var(--text-primary)', fontFamily: 'var(--font)', fontSize: 'var(--text-sm)' }}
+                                                    style={{ width: '120px', background: 'var(--bg-input)', border: '1px solid var(--border-light)', borderRadius: '4px', padding: '6px 10px', color: 'var(--text-primary)', fontFamily: 'var(--font)', fontSize: 'var(--text-sm)' }}
                                                 />
                                             ) : (
                                                 <span className="money">{formatMoney(c.pagado)}</span>
                                             )}
                                         </td>
-                                        <td className="money" style={{ textAlign: 'right', color: pendiente > 0 ? 'var(--accent-yellow)' : 'var(--accent-green)' }}>
+                                        <td className="money" style={{ textAlign: 'right', color: pendiente > 0 ? 'var(--status-warning)' : 'var(--positive)' }}>
                                             {formatMoney(pendiente)}
                                         </td>
                                         <td style={{ textAlign: 'right' }}>{pctPagado.toFixed(0)}%</td>

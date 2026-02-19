@@ -12,26 +12,24 @@ export default function ExpoLeads() {
     const [loading, setLoading] = useState(true)
     const [filtroEstado, setFiltroEstado] = useState('')
     const [filtroVendedor, setFiltroVendedor] = useState('')
-    const { isAdmin, user } = useAuth()
+    const { isAdmin } = useAuth()
 
-    useEffect(() => {
-        fetchData()
-    }, [])
+    useEffect(() => { fetchData() }, [])
 
     async function fetchData() {
-        const [leadsRes, vendedoresRes] = await Promise.all([
+        const [leadsRes, vendRes] = await Promise.all([
             supabase.from('expo_leads')
                 .select('*, vendedor:profiles!vendedor_id(name)')
                 .order('created_at', { ascending: false }),
             supabase.from('profiles').select('id, name').eq('role', 'VENDEDOR'),
         ])
         setLeads(leadsRes.data || [])
-        setVendedores(vendedoresRes.data || [])
+        setVendedores(vendRes.data || [])
         setLoading(false)
     }
 
     async function handleDelete(id) {
-        if (!confirm('¿Eliminar este lead?')) return
+        if (!confirm('Confirmar eliminacion del registro.')) return
         await supabase.from('expo_leads').delete().eq('id', id)
         setLeads(leads.filter(l => l.id !== id))
     }
@@ -42,40 +40,40 @@ export default function ExpoLeads() {
         return true
     })
 
-    // Summary stats
-    const totalLeads = leads.length
     const cerrados = leads.filter(l => l.estado === 'CERRADO').length
+    const conversion = leads.length > 0 ? ((cerrados / leads.length) * 100).toFixed(1) : '0.0'
     const ingresoConfirmado = leads
         .filter(l => l.estado === 'CERRADO')
         .reduce((s, l) => s + Number(l.precio_stand || 0), 0)
 
-    if (loading) return <div className="loading-spinner">Cargando leads de expo...</div>
+    if (loading) return <div className="loading-spinner">Cargando datos...</div>
 
     return (
         <div>
             <div className="page-header">
-                <h2>🏢 CRM — Expo Stands</h2>
-                <p>Gestión de leads y exhibidores para CONNECTA 2026</p>
+                <h2>CRM Expo</h2>
+                <p>Gestion de leads para stands de exposicion</p>
             </div>
 
-            {/* Mini KPIs */}
             <div className="kpi-grid">
                 <div className="kpi-card blue">
-                    <div className="kpi-label">Total Leads</div>
-                    <div className="kpi-value">{totalLeads}</div>
+                    <div className="kpi-label">Total leads</div>
+                    <div className="kpi-value">{leads.length}</div>
                 </div>
                 <div className="kpi-card green">
                     <div className="kpi-label">Cerrados</div>
                     <div className="kpi-value">{cerrados}</div>
-                    <div className="kpi-sub">Conversión: {totalLeads ? ((cerrados / totalLeads) * 100).toFixed(1) : 0}%</div>
                 </div>
                 <div className="kpi-card purple">
-                    <div className="kpi-label">Ingreso Confirmado</div>
+                    <div className="kpi-label">Tasa de conversion</div>
+                    <div className="kpi-value">{conversion}%</div>
+                </div>
+                <div className="kpi-card green">
+                    <div className="kpi-label">Ingreso confirmado</div>
                     <div className="kpi-value money">{formatMoney(ingresoConfirmado)}</div>
                 </div>
             </div>
 
-            {/* Toolbar */}
             <div className="toolbar">
                 <div className="toolbar-filters">
                     <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}>
@@ -89,10 +87,9 @@ export default function ExpoLeads() {
                         </select>
                     )}
                 </div>
-                <Link to="/expo/new" className="btn btn-primary">+ Nuevo Lead</Link>
+                <Link to="/expo/new" className="btn btn-primary">Nuevo Lead</Link>
             </div>
 
-            {/* Table */}
             <div className="card">
                 <div className="table-container">
                     <table>
@@ -100,21 +97,23 @@ export default function ExpoLeads() {
                             <tr>
                                 <th>Empresa</th>
                                 <th>Contacto</th>
+                                <th>Ciudad</th>
                                 <th>Estado</th>
                                 <th>Precio Stand</th>
                                 <th>Pagado</th>
                                 <th>Vendedor</th>
-                                <th>Próxima Acción</th>
+                                <th>Seguimiento</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filtered.length === 0 ? (
-                                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No hay leads registrados</td></tr>
+                                <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Sin registros</td></tr>
                             ) : filtered.map(lead => (
                                 <tr key={lead.id}>
                                     <td style={{ fontWeight: 600 }}>{lead.empresa}</td>
                                     <td>{lead.contacto_nombre}</td>
+                                    <td>{lead.ciudad || '—'}</td>
                                     <td><span className={`badge badge-${lead.estado.toLowerCase()}`}>{lead.estado}</span></td>
                                     <td className="money">{formatMoney(lead.precio_stand)}</td>
                                     <td className="money">{formatMoney(lead.monto_pagado)}</td>
@@ -124,7 +123,7 @@ export default function ExpoLeads() {
                                         <div style={{ display: 'flex', gap: '6px' }}>
                                             <Link to={`/expo/${lead.id}`} className="btn btn-secondary btn-sm">Editar</Link>
                                             {isAdmin && (
-                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm">✕</button>
+                                                <button onClick={() => handleDelete(lead.id)} className="btn btn-danger btn-sm">Eliminar</button>
                                             )}
                                         </div>
                                     </td>

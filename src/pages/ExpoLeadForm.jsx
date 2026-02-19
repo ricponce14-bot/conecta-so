@@ -21,9 +21,7 @@ export default function ExpoLeadForm() {
     const [saving, setSaving] = useState(false)
     const isNew = !id || id === 'new'
 
-    useEffect(() => {
-        loadData()
-    }, [id])
+    useEffect(() => { loadData() }, [id])
 
     async function loadData() {
         setLoading(true)
@@ -51,10 +49,11 @@ export default function ExpoLeadForm() {
         setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
     }
 
+    const anticipoReq = (Number(form.precio_stand) || 0) * 0.5
+
     async function handleSubmit(e) {
         e.preventDefault()
         setSaving(true)
-
         const payload = {
             ...form,
             precio_stand: Number(form.precio_stand) || 0,
@@ -63,44 +62,41 @@ export default function ExpoLeadForm() {
             fecha_ultimo_contacto: form.fecha_ultimo_contacto || null,
             fecha_proxima_accion: form.fecha_proxima_accion || null,
         }
-        delete payload.anticipo_requerido // computed column
         delete payload.id
         delete payload.created_at
+        delete payload.anticipo_requerido
 
         if (isNew) {
             await supabase.from('expo_leads').insert(payload)
         } else {
             await supabase.from('expo_leads').update(payload).eq('id', id)
         }
-
         setSaving(false)
         navigate('/expo')
     }
 
     if (loading) return <div className="loading-spinner">Cargando...</div>
 
-    const anticipoCalc = (Number(form.precio_stand) || 0) * 0.5
-
     return (
         <div>
             <div className="page-header">
-                <h2>{isNew ? '➕ Nuevo Lead Expo' : '✏️ Editar Lead Expo'}</h2>
-                <p>{isNew ? 'Registrar nuevo exhibidor potencial' : `Editando: ${form.empresa}`}</p>
+                <h2>{isNew ? 'Nuevo Lead Expo' : 'Editar Lead Expo'}</h2>
+                <p>{isNew ? 'Registrar nuevo prospecto de stand' : `Editando: ${form.empresa}`}</p>
             </div>
 
             <div className="card">
                 <form onSubmit={handleSubmit}>
                     <div className="form-grid">
                         <div className="form-group">
-                            <label>Empresa *</label>
+                            <label>Empresa</label>
                             <input name="empresa" value={form.empresa} onChange={handleChange} required />
                         </div>
                         <div className="form-group">
-                            <label>Nombre de Contacto *</label>
+                            <label>Contacto</label>
                             <input name="contacto_nombre" value={form.contacto_nombre} onChange={handleChange} required />
                         </div>
                         <div className="form-group">
-                            <label>Teléfono</label>
+                            <label>Telefono</label>
                             <input name="telefono" value={form.telefono} onChange={handleChange} />
                         </div>
                         <div className="form-group">
@@ -134,7 +130,7 @@ export default function ExpoLeadForm() {
                         </div>
                         <div className="form-group">
                             <label>Anticipo Requerido (50%)</label>
-                            <input value={`$${anticipoCalc.toLocaleString('es-MX')}`} disabled />
+                            <input type="text" value={`$${anticipoReq.toLocaleString('es-MX')}`} disabled style={{ opacity: 0.6 }} />
                         </div>
                         <div className="form-group">
                             <label>Monto Pagado (MXN)</label>
@@ -142,14 +138,14 @@ export default function ExpoLeadForm() {
                         </div>
                         <div className="form-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', paddingTop: '24px' }}>
                             <input name="anticipo_pagado" type="checkbox" checked={form.anticipo_pagado} onChange={handleChange} />
-                            <label style={{ textTransform: 'none', margin: 0 }}>Anticipo pagado</label>
+                            <label style={{ textTransform: 'none', margin: 0 }}>Anticipo cubierto</label>
                         </div>
                         <div className="form-group">
-                            <label>Fecha último contacto</label>
+                            <label>Ultimo contacto</label>
                             <input name="fecha_ultimo_contacto" type="date" value={form.fecha_ultimo_contacto} onChange={handleChange} />
                         </div>
                         <div className="form-group">
-                            <label>Fecha próxima acción</label>
+                            <label>Proxima accion</label>
                             <input name="fecha_proxima_accion" type="date" value={form.fecha_proxima_accion} onChange={handleChange} />
                         </div>
                         <div className="form-group full-width">
@@ -157,10 +153,9 @@ export default function ExpoLeadForm() {
                             <textarea name="notas" value={form.notas} onChange={handleChange} />
                         </div>
                     </div>
-
                     <div className="form-actions">
                         <button type="submit" className="btn btn-primary" disabled={saving}>
-                            {saving ? 'Guardando...' : (isNew ? 'Crear Lead' : 'Guardar Cambios')}
+                            {saving ? 'Guardando...' : (isNew ? 'Registrar Lead' : 'Guardar Cambios')}
                         </button>
                         <button type="button" className="btn btn-secondary" onClick={() => navigate('/expo')}>
                             Cancelar
