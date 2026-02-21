@@ -2,17 +2,30 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { formatMoney, formatDate } from '../lib/utils'
+import { formatMoney, formatDate, slugify } from '../lib/utils'
 
-const ESTADOS = ['PROSPECTO', 'NEGOCIACION', 'CERRADO', 'PERDIDO']
-const NIVELES = ['ORO', 'PLATA', 'ALIADO']
+const ESTADOS = [
+    'Prospecto Nuevo',
+    'Contactado',
+    'Cita Agendada',
+    'Negociación',
+    'Cerrado Pagado',
+    'Perdido',
+]
+
+const ZONAS = [
+    'Arandas / San Ignacio',
+    'Lagos de Moreno / San Juan',
+    'Jalostotitlán / San Miguel',
+    'Tepatitlán',
+]
 
 export default function SponsorLeads() {
     const [leads, setLeads] = useState([])
     const [vendedores, setVendedores] = useState([])
     const [loading, setLoading] = useState(true)
     const [filtroEstado, setFiltroEstado] = useState('')
-    const [filtroNivel, setFiltroNivel] = useState('')
+    const [filtroZona, setFiltroZona] = useState('')
     const { isAdmin } = useAuth()
 
     useEffect(() => { fetchData() }, [])
@@ -44,13 +57,13 @@ export default function SponsorLeads() {
 
     const filtered = leads.filter(l => {
         if (filtroEstado && l.estado !== filtroEstado) return false
-        if (filtroNivel && l.nivel !== filtroNivel) return false
+        if (filtroZona && l.zona !== filtroZona) return false
         return true
     })
 
-    const cerrados = leads.filter(l => l.estado === 'CERRADO').length
+    const cerrados = leads.filter(l => l.estado === 'Cerrado Pagado').length
     const ingresoConfirmado = leads
-        .filter(l => l.estado === 'CERRADO')
+        .filter(l => l.estado === 'Cerrado Pagado')
         .reduce((s, l) => s + Number(l.valor_total || 0), 0)
 
     if (loading) return <div className="loading-spinner">Cargando datos...</div>
@@ -83,9 +96,9 @@ export default function SponsorLeads() {
                         <option value="">Todos los estados</option>
                         {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
                     </select>
-                    <select value={filtroNivel} onChange={e => setFiltroNivel(e.target.value)} className="modern-select">
-                        <option value="">Todos los niveles</option>
-                        {NIVELES.map(n => <option key={n} value={n}>{n}</option>)}
+                    <select value={filtroZona} onChange={e => setFiltroZona(e.target.value)} className="modern-select">
+                        <option value="">Todas las zonas</option>
+                        {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
                     </select>
                 </div>
                 <Link to="/sponsors/new" className="btn btn-primary">Nuevo Patrocinio</Link>
@@ -98,7 +111,8 @@ export default function SponsorLeads() {
                             <tr>
                                 <th>Empresa</th>
                                 <th>Contacto</th>
-                                <th>Nivel</th>
+                                <th>Zona</th>
+                                <th>Tipo Patrocinio</th>
                                 <th>Estado</th>
                                 <th>Valor Total</th>
                                 <th>Pagado</th>
@@ -109,13 +123,14 @@ export default function SponsorLeads() {
                         </thead>
                         <tbody>
                             {filtered.length === 0 ? (
-                                <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Sin registros</td></tr>
+                                <tr><td colSpan="10" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Sin registros</td></tr>
                             ) : filtered.map(lead => (
                                 <tr key={lead.id}>
                                     <td data-label="Empresa" style={{ fontWeight: 600 }}>{lead.empresa}</td>
                                     <td data-label="Contacto">{lead.contacto}</td>
-                                    <td data-label="Nivel"><span className={`badge badge-${lead.nivel.toLowerCase()}`}>{lead.nivel}</span></td>
-                                    <td data-label="Estado"><span className={`badge badge-${lead.estado.toLowerCase()}`}>{lead.estado}</span></td>
+                                    <td data-label="Zona">{lead.zona || '—'}</td>
+                                    <td data-label="Tipo Patrocinio">{lead.tipo_patrocinio || '—'}</td>
+                                    <td data-label="Estado"><span className={`badge badge-${slugify(lead.estado)}`}>{lead.estado}</span></td>
                                     <td data-label="Valor Total" className="money">{formatMoney(lead.valor_total)}</td>
                                     <td data-label="Pagado" className="money">{formatMoney(lead.monto_pagado)}</td>
                                     <td data-label="Vendedor">{lead.vendedor?.name || '—'}</td>

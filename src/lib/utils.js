@@ -1,3 +1,15 @@
+// Convert status string → valid CSS class suffix
+// e.g. 'Cerrado Pagado' → 'cerrado-pagado', 'Negociación' → 'negociacion'
+export function slugify(str) {
+    if (!str) return ''
+    return str
+        .toLowerCase()
+        .normalize('NFD')                    // split accents from letters
+        .replace(/[\u0300-\u036f]/g, '')     // remove accent marks
+        .replace(/\s+/g, '-')               // spaces → hyphens
+        .replace(/[^a-z0-9-]/g, '')         // strip any remaining special chars
+}
+
 // Format number as Mexican Pesos
 export function formatMoney(amount) {
     return new Intl.NumberFormat('es-MX', {
@@ -29,10 +41,11 @@ export function getDaysRemaining() {
 }
 
 export const FINANCIAL = {
-    PRECIO_GENERAL: 300,
+    PRECIO_GENERAL: 350,
     PRECIO_VIP: 700,
     COSTO_BASE: 525100,
-    META_INGRESOS: 676000,
+    COSTOS_FIJOS: 525100,       // Costos Totales estáticos — no leer de DB
+    META_INGRESOS: 818000,
     META_UTILIDAD: 140000,
     COMISION_EXPO: 0.10,
     COMISION_SPONSOR: 0.10,

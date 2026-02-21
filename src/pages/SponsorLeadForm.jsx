@@ -4,12 +4,30 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Icons } from '../components/Icons'
 
-const ESTADOS = ['PROSPECTO', 'NEGOCIACION', 'CERRADO', 'PERDIDO']
-const NIVELES = ['ORO', 'PLATA', 'ALIADO']
+const ESTADOS = [
+    'Prospecto Nuevo',
+    'Contactado',
+    'Cita Agendada',
+    'Negociación',
+    'Cerrado Pagado',
+    'Perdido',
+]
+
+const ZONAS = [
+    'Arandas / San Ignacio',
+    'Lagos de Moreno / San Juan',
+    'Jalostotitlán / San Miguel',
+    'Tepatitlán',
+]
+
+const TIPOS_PATROCINIO = [
+    { label: 'Standard Sponsor', precio: null },
+    { label: 'Pabellon Municipal', precio: 18000 },
+]
 
 const emptySponsor = {
-    empresa: '', contacto: '', nivel: 'ALIADO', valor_total: '',
-    vendedor_id: '', estado: 'PROSPECTO', monto_pagado: 0,
+    empresa: '', contacto: '', tipo_patrocinio: 'Standard Sponsor', valor_total: '',
+    vendedor_id: '', zona: '', estado: 'Prospecto Nuevo', monto_pagado: 0,
     anticipo_pagado: false, fecha_seguimiento: '', notas: '',
 }
 
@@ -34,6 +52,8 @@ export default function SponsorLeadForm() {
             const { data } = await supabase.from('sponsor_leads').select('*').eq('id', id).single()
             if (data) setForm({
                 ...data,
+                tipo_patrocinio: data.tipo_patrocinio || 'Standard Sponsor',
+                zona: data.zona || '',
                 valor_total: data.valor_total || '',
                 monto_pagado: data.monto_pagado || 0,
                 fecha_seguimiento: data.fecha_seguimiento || '',
@@ -47,7 +67,16 @@ export default function SponsorLeadForm() {
 
     function handleChange(e) {
         const { name, value, type, checked } = e.target
-        setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+        if (name === 'tipo_patrocinio') {
+            const found = TIPOS_PATROCINIO.find(t => t.label === value)
+            setForm(prev => ({
+                ...prev,
+                tipo_patrocinio: value,
+                valor_total: found?.precio != null ? found.precio : prev.valor_total,
+            }))
+        } else {
+            setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+        }
     }
 
     async function handleSubmit(e) {
@@ -59,9 +88,13 @@ export default function SponsorLeadForm() {
             monto_pagado: Number(form.monto_pagado) || 0,
             vendedor_id: form.vendedor_id || null,
             fecha_seguimiento: form.fecha_seguimiento || null,
+            zona: form.zona || null,
+            tipo_patrocinio: form.tipo_patrocinio || null,
         }
         delete payload.id
         delete payload.created_at
+        // Remove old 'nivel' if still present from DB (legacy)
+        delete payload.nivel
 
         if (isNew) {
             await supabase.from('sponsor_leads').insert(payload)
@@ -105,15 +138,26 @@ export default function SponsorLeadForm() {
                     </div>
                     <div className="form-grid">
                         <div className="form-group">
-                            <label className="form-label">Nivel de Patrocinio</label>
-                            <select name="nivel" value={form.nivel} onChange={handleChange} className="modern-select" style={{ width: '100%' }}>
-                                {NIVELES.map(n => <option key={n} value={n}>{n}</option>)}
+                            <label className="form-label">Tipo de Patrocinio</label>
+                            <select name="tipo_patrocinio" value={form.tipo_patrocinio} onChange={handleChange} className="modern-select" style={{ width: '100%' }}>
+                                {TIPOS_PATROCINIO.map(t => (
+                                    <option key={t.label} value={t.label}>
+                                        {t.label}{t.precio != null ? ` — $${t.precio.toLocaleString('es-MX')}` : ' — Monto abierto'}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div className="form-group">
                             <label className="form-label">Estado</label>
                             <select name="estado" value={form.estado} onChange={handleChange} className="modern-select" style={{ width: '100%' }}>
                                 {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Zona Territorial <span style={{ color: 'var(--danger)' }}>*</span></label>
+                            <select name="zona" value={form.zona} onChange={handleChange} required className="modern-select" style={{ width: '100%' }}>
+                                <option value="">Seleccionar Zona...</option>
+                                {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
                             </select>
                         </div>
                         <div className="form-group">

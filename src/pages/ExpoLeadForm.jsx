@@ -4,11 +4,31 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Icons } from '../components/Icons'
 
-const ESTADOS = ['LEAD', 'CONTACTADO', 'PROPUESTA', 'NEGOCIACION', 'CERRADO', 'PERDIDO']
+const ESTADOS = [
+    'Prospecto Nuevo',
+    'Contactado',
+    'Cita Agendada',
+    'Negociación',
+    'Cerrado Pagado',
+    'Perdido',
+]
+
+const ZONAS = [
+    'Arandas / San Ignacio',
+    'Lagos de Moreno / San Juan',
+    'Jalostotitlán / San Miguel',
+    'Tepatitlán',
+]
+
+const TIPOS_STAND = [
+    { label: 'Basic Stand', precio: 2900 },
+    { label: 'Regional Plus Stand', precio: 4500 },
+]
 
 const emptyLead = {
     empresa: '', contacto_nombre: '', telefono: '', email: '', ciudad: '', giro: '',
-    vendedor_id: '', estado: 'LEAD', precio_stand: '', monto_pagado: 0,
+    vendedor_id: '', zona: '', tipo_stand: '', estado: 'Prospecto Nuevo',
+    precio_stand: '', monto_pagado: 0,
     anticipo_pagado: false, fecha_ultimo_contacto: '', fecha_proxima_accion: '', notas: '',
 }
 
@@ -33,6 +53,8 @@ export default function ExpoLeadForm() {
             const { data } = await supabase.from('expo_leads').select('*').eq('id', id).single()
             if (data) setForm({
                 ...data,
+                zona: data.zona || '',
+                tipo_stand: data.tipo_stand || '',
                 precio_stand: data.precio_stand || '',
                 monto_pagado: data.monto_pagado || 0,
                 fecha_ultimo_contacto: data.fecha_ultimo_contacto || '',
@@ -47,7 +69,12 @@ export default function ExpoLeadForm() {
 
     function handleChange(e) {
         const { name, value, type, checked } = e.target
-        setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+        if (name === 'tipo_stand') {
+            const found = TIPOS_STAND.find(t => t.label === value)
+            setForm(prev => ({ ...prev, tipo_stand: value, precio_stand: found ? found.precio : prev.precio_stand }))
+        } else {
+            setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+        }
     }
 
     const anticipoReq = (Number(form.precio_stand) || 0) * 0.5
@@ -62,6 +89,8 @@ export default function ExpoLeadForm() {
             vendedor_id: form.vendedor_id || null,
             fecha_ultimo_contacto: form.fecha_ultimo_contacto || null,
             fecha_proxima_accion: form.fecha_proxima_accion || null,
+            zona: form.zona || null,
+            tipo_stand: form.tipo_stand || null,
         }
         delete payload.id
         delete payload.created_at
@@ -128,6 +157,20 @@ export default function ExpoLeadForm() {
                             <label className="form-label">Estado del Lead</label>
                             <select name="estado" value={form.estado} onChange={handleChange} className="modern-select" style={{ width: '100%' }}>
                                 {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Zona Territorial <span style={{ color: 'var(--danger)' }}>*</span></label>
+                            <select name="zona" value={form.zona} onChange={handleChange} required className="modern-select" style={{ width: '100%' }}>
+                                <option value="">Seleccionar Zona...</option>
+                                {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Tipo de Stand</label>
+                            <select name="tipo_stand" value={form.tipo_stand} onChange={handleChange} className="modern-select" style={{ width: '100%' }}>
+                                <option value="">Seleccionar Tipo...</option>
+                                {TIPOS_STAND.map(t => <option key={t.label} value={t.label}>{t.label} — ${t.precio.toLocaleString('es-MX')}</option>)}
                             </select>
                         </div>
                         <div className="form-group">

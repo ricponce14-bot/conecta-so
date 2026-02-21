@@ -22,7 +22,9 @@ export default function Costs() {
     }
 
     async function saveEdit(id) {
+        const cost = costs.find(c => c.id === id)
         if (Number(editPagado) < 0) return alert('El monto no puede ser negativo')
+        if (cost && Number(editPagado) > Number(cost.total)) return alert(`El monto pagado no puede superar el total (${formatMoney(cost.total)})`)
 
         const { error } = await supabase.from('costs').update({ pagado: Number(editPagado) }).eq('id', id)
 
@@ -102,6 +104,7 @@ export default function Costs() {
                                                 <input
                                                     type="number"
                                                     min="0"
+                                                    max={c.total}
                                                     step="0.01"
                                                     value={editPagado}
                                                     onChange={e => setEditPagado(e.target.value)}

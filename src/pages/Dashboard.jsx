@@ -64,13 +64,11 @@ export default function Dashboard() {
     if (!data) return null
 
     // --- Global Calculations (Admin) ---
-    const expoCerrados = data.expo.filter(l => l.estado === 'CERRADO')
+    const expoCerrados = data.expo.filter(l => l.estado === 'Cerrado Pagado')
     const ingresoExpo = expoCerrados.reduce((s, l) => s + Number(l.precio_stand || 0), 0)
-    const expoAnticipoPagado = data.expo.reduce((s, l) => s + Number(l.monto_pagado || 0), 0)
 
-    const sponsorCerrados = data.sponsors.filter(l => l.estado === 'CERRADO')
+    const sponsorCerrados = data.sponsors.filter(l => l.estado === 'Cerrado Pagado')
     const ingresoSponsors = sponsorCerrados.reduce((s, l) => s + Number(l.valor_total || 0), 0)
-    const sponsorPagado = data.sponsors.reduce((s, l) => s + Number(l.monto_pagado || 0), 0)
 
     const totalGen = data.tickets.reduce((s, t) => s + Number(t.generales_vendidos), 0)
     const totalVip = data.tickets.reduce((s, t) => s + Number(t.vip_vendidos), 0)
@@ -79,11 +77,9 @@ export default function Dashboard() {
     const ingresoConsumo = data.tickets.reduce((s, t) => s + Number(t.consumo_estimado), 0)
     const ingresoTickets = ingresoGeneral + ingresoVip + ingresoConsumo
 
-    const totalCosts = data.costs.reduce((s, c) => s + Number(c.total), 0)
-    const totalPagado = data.costs.reduce((s, c) => s + Number(c.pagado), 0)
-
     const ingresoConfirmado = ingresoExpo + ingresoSponsors + ingresoTickets
-    const utilidadProyectada = ingresoConfirmado - totalCosts
+    // Utilidad Proyectada usa costos fijos estáticos ($525,100)
+    const utilidadProyectada = ingresoConfirmado - FINANCIAL.COSTOS_FIJOS
     const progress = FINANCIAL.META_INGRESOS > 0 ? ingresoConfirmado / FINANCIAL.META_INGRESOS : 0
     const daysRemaining = getDaysRemaining()
     const alerts = getSmartAlerts(progress, daysRemaining)
@@ -93,17 +89,16 @@ export default function Dashboard() {
     const myExpo = data.expo.filter(l => l.vendedor_id === profile?.id)
     const mySponsors = data.sponsors.filter(l => l.vendedor_id === profile?.id)
 
-    // Calculate My Sales (Only CLOSED/SOLD)
+    // Comisión solo aplica a deals 'Cerrado Pagado'
     const myExpoSales = myExpo
-        .filter(l => l.estado === 'CERRADO')
+        .filter(l => l.estado === 'Cerrado Pagado')
         .reduce((s, l) => s + Number(l.precio_stand || 0), 0)
 
     const mySponsorSales = mySponsors
-        .filter(l => l.estado === 'CERRADO')
+        .filter(l => l.estado === 'Cerrado Pagado')
         .reduce((s, l) => s + Number(l.valor_total || 0), 0)
 
     const myTotalSales = myExpoSales + mySponsorSales
-    // Both are now 10%, so we can just use one constant or average, but simpler to just use base rate
     const myCommission = myTotalSales * FINANCIAL.COMISION_EXPO
 
     // Chart Data (Admin Only for now, or filtered for Seller?)
@@ -255,7 +250,7 @@ export default function Dashboard() {
                         <div className={`kpi-card ${utilidadProyectada >= 0 ? 'green' : 'red'}`}>
                             <div className="kpi-label">Utilidad Proyectada</div>
                             <div className="kpi-value money">{formatMoney(utilidadProyectada)}</div>
-                            <div className="kpi-sub">vs. Costos: {formatMoney(totalCosts)}</div>
+                            <div className="kpi-sub">vs. Costos Fijos: {formatMoney(FINANCIAL.COSTOS_FIJOS)}</div>
                             <div className="kpi-icon-bg"><Icons.DollarSign /></div>
                         </div>
                     </>
@@ -265,13 +260,13 @@ export default function Dashboard() {
                         <div className="kpi-card blue">
                             <div className="kpi-label">Mis Prospectos Expo</div>
                             <div className="kpi-value">{myExpo.length}</div>
-                            <div className="kpi-sub">{myExpo.filter(l => l.estado === 'CERRADO').length} cerrados</div>
+                            <div className="kpi-sub">{myExpo.filter(l => l.estado === 'Cerrado Pagado').length} cerrados</div>
                             <div className="kpi-icon-bg"><Icons.Briefcase /></div>
                         </div>
                         <div className="kpi-card purple">
                             <div className="kpi-label">Mis Sponsors</div>
                             <div className="kpi-value">{mySponsors.length}</div>
-                            <div className="kpi-sub">{mySponsors.filter(l => l.estado === 'CERRADO').length} cerrados</div>
+                            <div className="kpi-sub">{mySponsors.filter(l => l.estado === 'Cerrado Pagado').length} cerrados</div>
                             <div className="kpi-icon-bg"><Icons.Handshake /></div>
                         </div>
                     </>

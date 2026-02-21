@@ -936,8 +936,8 @@ tr:hover td {
     /* Adjust Main Content for Double Header */
     .main-content {
         margin-left: 0;
-        padding: 170px 16px 20px 16px !important;
-        /* FORCED UPDATE */
+        padding: 172px 16px 20px 16px !important;
+        /* FORCED HASH UPDATE */
         width: 100%;
     }
 
@@ -1186,4 +1186,217 @@ tr:hover td {
     accent-color: var(--primary);
 }
 
-/* Force Refresh: 2026-02-19T05:30:00 */
+/* Force Refresh: 2026-02-21T00:55:00 */
+
+/* ================================================
+   BADGE — Pipeline Status
+   ================================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* New pipeline values */
+.badge-prospecto-nuevo {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.badge-contactado {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.badge-cita-agendada {
+    background: #fefce8;
+    color: #a16207;
+}
+
+.badge-negociación,
+.badge-negociacion {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.badge-cerrado-pagado {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #6ee7b7;
+}
+
+.badge-perdido {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+/* Legacy fallbacks (in case old data still shows) */
+.badge-lead {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.badge-contactado {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.badge-propuesta {
+    background: #fefce8;
+    color: #a16207;
+}
+
+.badge-negociacion {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.badge-cerrado {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #6ee7b7;
+}
+
+.badge-perdido {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.badge-prospecto {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.badge-oro {
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.badge-plata {
+    background: #f8fafc;
+    color: #475569;
+}
+
+.badge-aliado {
+    background: #f5f3ff;
+    color: #6d28d9;
+}
+
+/* ================================================
+   PROGRESS BAR COLOR VARIANTS
+   ================================================ */
+.progress-fill.green {
+    background: linear-gradient(90deg, #059669, #10b981);
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+}
+
+.progress-fill.yellow {
+    background: linear-gradient(90deg, #d97706, #f59e0b);
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4);
+}
+
+.progress-fill.red {
+    background: linear-gradient(90deg, #dc2626, #ef4444);
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4);
+}
+
+/* ================================================
+   BUTTON VARIANTS (missing from previous)
+   ================================================ */
+.btn-secondary {
+    background: #f1f5f9;
+    color: var(--text-primary);
+    border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.btn-danger:hover {
+    background: #fee2e2;
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    border-radius: 8px;
+}
+
+/* Toolbar layout */
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.toolbar-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* KPI card color variants missing */
+.kpi-card.orange::before {
+    background: #f97316;
+}
+
+.kpi-card.yellow::before {
+    background: #f59e0b;
+}
+
+.kpi-card.red::before {
+    background: var(--error);
+}
+
+/* Loading */
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    font-weight: 600;
+    color: var(--text-muted);
+    gap: 12px;
+}
+
+.spinner-ring {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Money formatting class */
+.money {
+    font-variant-numeric: tabular-nums;
+}
+
+.positive,
+.var--positive {
+    color: var(--success);
+}
