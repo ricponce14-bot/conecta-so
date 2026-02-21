@@ -63,6 +63,12 @@ export default function Layout() {
                     <Icons.BarChart size={20} />
                     <span>KPIs</span>
                 </NavLink>
+                {isAdmin && (
+                    <NavLink to="/equipo" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        <Icons.Users size={20} />
+                        <span>Equipo</span>
+                    </NavLink>
+                )}
             </nav>
 
             {/* Desktop Sidebar (Hidden on Mobile) */}
@@ -100,6 +106,12 @@ export default function Layout() {
                         <Icons.BarChart className="nav-icon" />
                         <span>KPIs</span>
                     </NavLink>
+                    {isAdmin && (
+                        <NavLink to="/equipo" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                            <Icons.Users className="nav-icon" />
+                            <span>Equipo</span>
+                        </NavLink>
+                    )}
                 </nav>
 
                 <div className="sidebar-footer">

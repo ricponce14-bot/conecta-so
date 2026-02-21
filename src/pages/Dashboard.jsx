@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { formatMoney, formatNumber, getDaysRemaining, getSmartAlerts, FINANCIAL } from '../lib/utils'
+import { generateRecommendations, revenueVelocity, requiredDailyVelocity, breakEvenProbability, expectedPipelineValue, daysRemaining as calcDaysRemaining } from '../lib/analytics'
 import { Icons } from '../components/Icons'
 
 export default function Dashboard() {
@@ -14,7 +15,6 @@ export default function Dashboard() {
 
     async function fetchAll() {
         try {
-            // Verify Supabase Connection
             if (!supabase.supabaseUrl) throw new Error("Supabase URL missing")
 
             const results = await Promise.allSettled([
@@ -22,17 +22,16 @@ export default function Dashboard() {
                 supabase.from('sponsor_leads').select('*'),
                 supabase.from('tickets').select('*'),
                 supabase.from('costs').select('*'),
+                supabase.from('profiles').select('id, name, role'),
+                supabase.from('expo_leads').select('vendedor_id, estado, precio_stand, zona'),
+                supabase.from('sponsor_leads').select('vendedor_id, estado, valor_total, zona'),
             ])
 
-            const [expoRes, sponsorRes, ticketRes, costRes] = results
+            const [expoRes, sponsorRes, ticketRes, costRes, profilesRes, expoKpiRes, sponsorKpiRes] = results
 
             const getData = (res, name) => {
-                if (res.status === 'fulfilled' && !res.value.error) {
-                    return res.value.data || []
-                }
-                const msg = `Error fetching ${name}: ${res.reason || res.value?.error?.message}`
-                console.warn(msg)
-                if (!error) setError(msg)
+                if (res.status === 'fulfilled' && !res.value.error) return res.value.data || []
+                console.warn(`Error fetching ${name}:`, res.reason || res.value?.error?.message)
                 return []
             }
 
@@ -41,6 +40,9 @@ export default function Dashboard() {
                 sponsors: getData(sponsorRes, 'sponsors'),
                 tickets: getData(ticketRes, 'tickets'),
                 costs: getData(costRes, 'costs'),
+                profiles: getData(profilesRes, 'profiles'),
+                expoKpi: getData(expoKpiRes, 'expoKpi'),
+                sponsorKpi: getData(sponsorKpiRes, 'sponsorKpi'),
             })
         } catch (err) {
             console.error('Critical dashboard error:', err)
@@ -100,6 +102,22 @@ export default function Dashboard() {
 
     const myTotalSales = myExpoSales + mySponsorSales
     const myCommission = myTotalSales * FINANCIAL.COMISION_EXPO
+
+    // --- Analytics (Admin only) ---
+    const vendedores = (data.profiles || []).filter(p => p.role === 'VENDEDOR').map(p => {
+        const pExpo = (data.expoKpi || data.expo).filter(l => l.vendedor_id === p.id)
+        const pSponsor = (data.sponsorKpi || data.sponsors).filter(l => l.vendedor_id === p.id)
+        const expoRevenue = pExpo.filter(l => l.estado === 'Cerrado Pagado').reduce((s, l) => s + Number(l.precio_stand || 0), 0)
+        const sponsorRevenue = pSponsor.filter(l => l.estado === 'Cerrado Pagado').reduce((s, l) => s + Number(l.valor_total || 0), 0)
+        return { id: p.id, name: p.name, totalRevenue: expoRevenue + sponsorRevenue, totalAssigned: pExpo.length + pSponsor.length, totalClosed: pExpo.filter(l => l.estado === 'Cerrado Pagado').length + pSponsor.filter(l => l.estado === 'Cerrado Pagado').length }
+    })
+
+    const recommendations = isAdmin ? generateRecommendations({
+        confirmedRevenue: ingresoConfirmado,
+        expoLeads: data.expo,
+        sponsorLeads: data.sponsors,
+        vendedores,
+    }) : []
 
     // Chart Data (Admin Only for now, or filtered for Seller?)
     // Simpler to just hide chart for seller or show empty
@@ -179,6 +197,44 @@ export default function Dashboard() {
                     {a.message}
                 </div>
             ))}
+
+            {/* === STRATEGIC RECOMMENDATIONS (Admin only) === */}
+            {isAdmin && recommendations.length > 0 && (
+                <div className="card" style={{ marginBottom: '32px', padding: '24px 28px' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        🤖 Motor de Recomendaciones Estratégicas
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, background: '#f1f5f9', padding: '3px 8px', borderRadius: '99px', color: '#64748b' }}>IA + Estadística</span>
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                        {recommendations.map((rec, i) => (
+                            <div key={i} style={{
+                                borderRadius: '12px',
+                                border: `1px solid ${rec.color}30`,
+                                background: `${rec.color}08`,
+                                padding: '18px 20px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '8px',
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{rec.title}</span>
+                                    <span style={{
+                                        fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px',
+                                        borderRadius: '99px', background: rec.color, color: 'white',
+                                        whiteSpace: 'nowrap', letterSpacing: '0.05em'
+                                    }}>{rec.priority}</span>
+                                </div>
+                                <p style={{ fontSize: '0.85rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>{rec.body}</p>
+                                <div style={{ background: 'rgba(255,255,255,0.7)', borderRadius: '8px', padding: '10px 12px', marginTop: '4px' }}>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: rec.color, marginBottom: '4px' }}>⚡ Acción recomendada:</div>
+                                    <div style={{ fontSize: '0.83rem', color: '#334155', lineHeight: 1.5 }}>{rec.action}</div>
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, paddingTop: '4px' }}>📅 Métrica: {rec.metric}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Admin: Revenue Progress | Seller: Motivational Message */}
             {isAdmin ? (

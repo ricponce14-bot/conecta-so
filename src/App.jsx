@@ -12,6 +12,7 @@ import SponsorLeadForm from './pages/SponsorLeadForm'
 import Tickets from './pages/Tickets'
 import Costs from './pages/Costs'
 import SalesKPIs from './pages/SalesKPIs'
+import Equipo from './pages/Equipo'
 import Debug from './pages/Debug'
 import './index.css'
 
@@ -55,6 +56,7 @@ function AppRoutes() {
                 <Route path="/tickets" element={<ProtectedRoute adminOnly><Tickets /></ProtectedRoute>} />
                 <Route path="/costs" element={<ProtectedRoute adminOnly><Costs /></ProtectedRoute>} />
                 <Route path="/kpis" element={<SalesKPIs />} />
+                <Route path="/equipo" element={<ProtectedRoute adminOnly><Equipo /></ProtectedRoute>} />
             </Route>
             <Route path="*" element={<Navigate to="/" />} />
         </Routes>
